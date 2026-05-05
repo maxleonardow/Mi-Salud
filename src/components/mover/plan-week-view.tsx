@@ -29,7 +29,8 @@ export function PlanWeekView() {
       </div>
       {ordered.map(({ dow, slot }) => {
         const isToday = dow === todayDow;
-        const label = slot?.template?.name ?? slot?.activity_label ?? "—";
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const label = (slot as any)?.template?.name ?? slot?.activity_label ?? "—";
         const hasWorkout = !!slot?.template_id;
         return (
           <div
