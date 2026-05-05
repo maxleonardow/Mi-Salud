@@ -1,0 +1,1 @@
+-- Seed data goes here. Empty for now — module catalogs will be added in later plans.
