@@ -372,6 +372,171 @@ export interface Database {
         };
         Relationships: [];
       };
+      supplements: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          brand: string | null;
+          form: "capsula" | "tableta" | "polvo" | "liquido" | "softgel";
+          dose_amount: number;
+          dose_unit: "mg" | "g" | "mcg" | "IU" | "ml";
+          category: "vitamina" | "mineral" | "aminoacido" | "herb" | "probiotico" | "omega" | "otro";
+          notes: string | null;
+          active: boolean;
+          is_seed: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          brand?: string | null;
+          form: "capsula" | "tableta" | "polvo" | "liquido" | "softgel";
+          dose_amount: number;
+          dose_unit: "mg" | "g" | "mcg" | "IU" | "ml";
+          category: "vitamina" | "mineral" | "aminoacido" | "herb" | "probiotico" | "omega" | "otro";
+          notes?: string | null;
+          active?: boolean;
+          is_seed?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          brand?: string | null;
+          form?: "capsula" | "tableta" | "polvo" | "liquido" | "softgel";
+          dose_amount?: number;
+          dose_unit?: "mg" | "g" | "mcg" | "IU" | "ml";
+          category?: "vitamina" | "mineral" | "aminoacido" | "herb" | "probiotico" | "omega" | "otro";
+          notes?: string | null;
+          active?: boolean;
+          is_seed?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      supplement_schedules: {
+        Row: {
+          id: string;
+          supplement_id: string;
+          user_id: string;
+          time_of_day: "manana" | "mediodia" | "tarde" | "noche" | "con_comida" | "antes_dormir";
+          days_of_week: number[];
+          reminder: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          supplement_id: string;
+          user_id: string;
+          time_of_day: "manana" | "mediodia" | "tarde" | "noche" | "con_comida" | "antes_dormir";
+          days_of_week?: number[];
+          reminder?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          supplement_id?: string;
+          user_id?: string;
+          time_of_day?: "manana" | "mediodia" | "tarde" | "noche" | "con_comida" | "antes_dormir";
+          days_of_week?: number[];
+          reminder?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      supplement_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          supplement_id: string;
+          schedule_id: string | null;
+          taken_at: string;
+          skipped: boolean;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          supplement_id: string;
+          schedule_id?: string | null;
+          taken_at?: string;
+          skipped?: boolean;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          supplement_id?: string;
+          schedule_id?: string | null;
+          taken_at?: string;
+          skipped?: boolean;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      supplement_stacks: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      supplement_stack_items: {
+        Row: {
+          id: string;
+          stack_id: string;
+          supplement_id: string;
+          order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          stack_id: string;
+          supplement_id: string;
+          order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          stack_id?: string;
+          supplement_id?: string;
+          order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           user_id: string;

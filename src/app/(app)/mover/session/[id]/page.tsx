@@ -37,7 +37,7 @@ export default function SessionPage() {
 
   const current = prescribed[currentIdx];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const currentExerciseObj = (current as any).exercise as { id: string; name: string; substitute_ids: string[]; technique: string | null } | undefined;
+  const currentExerciseObj = (current as any).exercise as { id: string; name: string; substitute_ids: string[]; technique: string | null; image_url: string | null } | undefined;
   const exerciseToUse = substitutes[current.id]
     ? { id: substitutes[current.id].id, name: substitutes[current.id].name }
     : { id: currentExerciseObj?.id ?? "", name: currentExerciseObj?.name ?? "" };
@@ -92,9 +92,19 @@ export default function SessionPage() {
       </div>
 
       {/* Exercise card */}
-      <div className="flex gap-4 items-start rounded-xl border border-[var(--border-strong)] bg-white p-4">
-        <ExerciseImagePlaceholder name={exerciseToUse.name} size={96} />
-        <div className="flex-1 text-sm">
+      <div className="rounded-xl border border-[var(--border-strong)] bg-white overflow-hidden">
+        {currentExerciseObj?.image_url ? (
+          <img
+            src={currentExerciseObj.image_url}
+            alt={`Cómo hacer ${exerciseToUse.name}`}
+            className="w-full aspect-video object-cover"
+          />
+        ) : (
+          <div className="p-4">
+            <ExerciseImagePlaceholder name={exerciseToUse.name} size={80} />
+          </div>
+        )}
+        <div className="p-4 text-sm">
           <p className="font-semibold text-base">
             {current.prescribed_sets} sets × {current.reps_min === current.reps_max ? current.reps_min : `${current.reps_min}-${current.reps_max}`} reps
           </p>
