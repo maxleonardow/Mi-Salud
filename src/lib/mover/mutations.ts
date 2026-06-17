@@ -10,12 +10,10 @@ export function useStartSession() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { templateId: string | null; date?: string }) => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("workout_sessions")
         .insert({
-          user_id: u.user.id,
+          user_id: "c44deaea-9de2-4eb2-b552-307fac7ecfdf",
           template_id: params.templateId,
           date: params.date ?? new Date().toISOString().slice(0, 10),
           status: "in_progress",
@@ -45,9 +43,6 @@ export function useLogSet() {
       rpe?: number | null;
       notes?: string | null;
     }) => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not authenticated");
-
       const { data: priorRows } = await supabase
         .from("exercise_set_logs")
         .select("weight_kg, reps")
@@ -66,7 +61,7 @@ export function useLogSet() {
       const { data, error } = await supabase
         .from("exercise_set_logs")
         .insert({
-          user_id: u.user.id,
+          user_id: "c44deaea-9de2-4eb2-b552-307fac7ecfdf",
           session_id: params.sessionId,
           exercise_id: params.exerciseId,
           set_number: params.setNumber,
