@@ -190,7 +190,7 @@ export function useWeeklyAdherence() {
   for (const sup of supplements) {
     for (const sched of sup.supplement_schedules) {
       for (let d = 0; d < 7; d++) {
-        const date = new Date(sevenDaysAgo);
+        const date = new Date(startStr);
         date.setDate(date.getDate() + d);
         if (sched.days_of_week.includes(date.getDay())) {
           expected++;

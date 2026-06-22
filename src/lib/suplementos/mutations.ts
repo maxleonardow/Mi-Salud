@@ -5,19 +5,18 @@ import { createClient } from "@/lib/supabase/client";
 import type { SupplementFormValues, StackFormValues } from "./schemas";
 
 const supabase = createClient();
+const USER_ID = "c44deaea-9de2-4eb2-b552-307fac7ecfdf";
 
 /** Create a new supplement with schedules */
 export function useCreateSupplement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: SupplementFormValues) => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not authenticated");
 
       const { data: supplement, error } = await supabase
         .from("supplements")
         .insert({
-          user_id: u.user.id,
+          user_id: USER_ID,
           name: values.name,
           brand: values.brand || null,
           form: values.form,
@@ -37,7 +36,7 @@ export function useCreateSupplement() {
           .insert(
             values.schedules.map((s) => ({
               supplement_id: supplement.id,
-              user_id: u.user!.id,
+              user_id: USER_ID,
               time_of_day: s.time_of_day,
               days_of_week: s.days_of_week,
               reminder: s.reminder,
@@ -65,8 +64,6 @@ export function useUpdateSupplement() {
       id: string;
       values: SupplementFormValues;
     }) => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not authenticated");
 
       const { data: supplement, error } = await supabase
         .from("supplements")
@@ -97,7 +94,7 @@ export function useUpdateSupplement() {
           .insert(
             values.schedules.map((s) => ({
               supplement_id: id,
-              user_id: u.user!.id,
+              user_id: USER_ID,
               time_of_day: s.time_of_day,
               days_of_week: s.days_of_week,
               reminder: s.reminder,
@@ -163,13 +160,11 @@ export function useLogSupplement() {
       skipped?: boolean;
       notes?: string;
     }) => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
         .from("supplement_logs")
         .insert({
-          user_id: u.user.id,
+          user_id: USER_ID,
           supplement_id: supplementId,
           schedule_id: scheduleId,
           taken_at: new Date().toISOString(),
@@ -209,13 +204,11 @@ export function useCreateStack() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: StackFormValues) => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not authenticated");
 
       const { data: stack, error } = await supabase
         .from("supplement_stacks")
         .insert({
-          user_id: u.user.id,
+          user_id: USER_ID,
           name: values.name,
           description: values.description || null,
         })
