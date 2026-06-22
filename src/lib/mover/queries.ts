@@ -43,7 +43,7 @@ export function useTemplateExercises(templateId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("workout_template_exercises")
-        .select("*, exercise:exercises(*)")
+        .select("*, exercise:exercises(id, name, technique, substitute_ids, image_url, exercise_type, muscle_groups)")
         .eq("template_id", templateId!)
         .order("position");
       if (error) throw error;
