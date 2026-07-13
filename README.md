@@ -18,7 +18,7 @@ Producción: [health-app-tau-gold.vercel.app](https://health-app-tau-gold.vercel
 - Supabase Auth, Postgres, PostgREST y Row Level Security.
 - TanStack Query para consultas, caché y mutaciones del cliente.
 - Tailwind CSS v4 y componentes sobre Base UI.
-- Serwist para instalación PWA y caché del shell. Las escrituras de datos requieren conexión; todavía no existe una cola offline.
+- Serwist para instalación PWA y caché exclusiva de assets estáticos versionados. HTML, RSC y datos de Supabase siempre usan red; todavía no existe una cola offline.
 - Vercel para despliegue.
 
 La aplicación admite una sola cuenta. `src/proxy.ts` hace el control de navegación optimista y la base de datos aplica la autorización definitiva mediante RLS. El login nunca crea usuarios nuevos (`shouldCreateUser: false`); `ALLOWED_EMAIL` agrega una allowlist explícita cuando está configurada.

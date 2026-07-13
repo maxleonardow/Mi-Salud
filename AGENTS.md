@@ -59,6 +59,8 @@ Copia `.env.example` a `.env.local`:
   ni mezcles `getDay()` con `getUTCDay()`.
 - Las escrituras compuestas de suplementos y stacks pasan por las RPC `save_supplement`
   y `save_supplement_stack`, para conservar atomicidad.
+- El service worker solo cachea assets estáticos. Nunca agregues HTML, RSC, API ni tráfico
+  de Supabase al cache: contienen o pueden revelar datos de salud.
 
 ## Base de datos (Supabase remoto)
 
