@@ -42,7 +42,10 @@ Copia `.env.example` a `.env.local`:
 - **Hoy** (`/`) — checklist del día que agrega tareas de TODOS los módulos (ejercicio + suplementos + hábitos)
 - **Suplementos** (`/suplementos`) — catálogo con horarios (ayunas/desayuno/cena/noche/antes_dormir), dosis y stacks
 - **Hábitos** (`/habitos`) — hábitos con momento del día y días de la semana
-- **Comer** (`/comer`), **Mover** (`/mover`, ejercicio), **Biomarcadores** (`/labs`), **Ajustes** (`/ajustes`)
+- **Comer** (`/comer`) — alimentos, macros e historial
+- **Mover** (`/mover`) — ejercicio, plan, sesiones e historial
+- **Biomarcadores** (`/labs`) — resultados y rangos del reporte
+- **Ajustes** (`/ajustes`) — perfil, unidades, apariencia y sesión
 
 ## Convenciones críticas (el "por qué" no obvio)
 
@@ -80,6 +83,8 @@ Copia `.env.example` a `.env.local`:
   normaliza RLS y políticas para todas las tablas. Aplicarla antes de desplegar este cambio.
 - **Migración `20260713010000_atomic_catalog_writes.sql` NO aplicada al remoto todavía** —
   agrega las RPC transaccionales requeridas por las mutaciones de suplementos y stacks.
+- **Migraciones `20260713020000_nutrition_tracking.sql` y `20260713030000_biomarker_tracking.sql`
+  NO aplicadas al remoto todavía** — crean las tablas requeridas por Comer y Labs.
 - **Plan de ejercicio (Mover):** se diseñó una calibración (plantillas A/B en formato superset
   de 45 min + cardio Zona 2 en días sueltos) pero **aún no está montada** en el módulo. Ver
   `supabase/seed/workout-seed.sql` para la estructura actual del plan.

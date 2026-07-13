@@ -603,6 +603,99 @@ export interface Database {
         };
         Relationships: [];
       };
+      food_entries: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          meal_type: "desayuno" | "comida" | "cena" | "snack";
+          calories: number;
+          protein_g: number;
+          carbs_g: number;
+          fat_g: number;
+          fiber_g: number;
+          notes: string | null;
+          occurred_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          meal_type: "desayuno" | "comida" | "cena" | "snack";
+          calories?: number;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+          fiber_g?: number;
+          notes?: string | null;
+          occurred_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          meal_type?: "desayuno" | "comida" | "cena" | "snack";
+          calories?: number;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+          fiber_g?: number;
+          notes?: string | null;
+          occurred_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      biomarker_results: {
+        Row: {
+          id: string;
+          user_id: string;
+          marker_name: string;
+          value: number;
+          unit: string;
+          reference_min: number | null;
+          reference_max: number | null;
+          measured_at: string;
+          laboratory: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          marker_name: string;
+          value: number;
+          unit: string;
+          reference_min?: number | null;
+          reference_max?: number | null;
+          measured_at?: string;
+          laboratory?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          marker_name?: string;
+          value?: number;
+          unit?: string;
+          reference_min?: number | null;
+          reference_max?: number | null;
+          measured_at?: string;
+          laboratory?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           user_id: string;

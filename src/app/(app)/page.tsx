@@ -2,6 +2,7 @@ import { ModuleHeader } from "@/components/layout/module-header";
 import { TodayBanner } from "@/components/mover/today-banner";
 import { DailyChecklist } from "@/components/suplementos/daily-checklist";
 import { HabitsChecklist } from "@/components/habitos/habits-checklist";
+import { NutritionTodayCard } from "@/components/comer/nutrition-today-card";
 import { formatAppDate } from "@/lib/date";
 import { connection } from "next/server";
 
@@ -38,6 +39,13 @@ export default async function HoyPage() {
             Hábitos
           </p>
           <HabitsChecklist />
+        </section>
+
+        <section>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-3">
+            Alimentación
+          </p>
+          <NutritionTodayCard />
         </section>
       </div>
     </>

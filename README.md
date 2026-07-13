@@ -10,7 +10,9 @@ Producción: [health-app-tau-gold.vercel.app](https://health-app-tau-gold.vercel
 - **Suplementos:** catálogo, dosis, horarios, adherencia de siete días y stacks.
 - **Hábitos:** programación por día y momento, con registro diario.
 - **Mover:** plan semanal, sesiones, series e historial.
-- **Comer, Labs y Ajustes:** rutas preparadas para las siguientes iteraciones de producto.
+- **Comer:** registro diario de alimentos, macros, edición e historial.
+- **Labs:** resultados de biomarcadores, rangos del reporte, resumen e historial.
+- **Ajustes:** perfil, unidades, apariencia, seguridad y cierre de sesión.
 
 ## Arquitectura
 
@@ -63,6 +65,8 @@ Las migraciones están ordenadas en `supabase/migrations/`. Para una instalació
 1. `20260623010000_supplement_cadences.sql`: corrige cadencias del catálogo inicial.
 2. `20260713000000_authenticated_rls.sql`: activa y normaliza RLS en todas las tablas.
 3. `20260713010000_atomic_catalog_writes.sql`: crea las RPC transaccionales de suplementos y stacks.
+4. `20260713020000_nutrition_tracking.sql`: agrega registros privados de alimentación.
+5. `20260713030000_biomarker_tracking.sql`: agrega resultados privados de biomarcadores.
 
 `supabase/apply-all.sql` es un bootstrap no destructivo para el catálogo y los hábitos iniciales. Usa `upsert` por usuario y nombre, conserva logs y respeta el estado activo de registros existentes. Los archivos de `supabase/seed/` son seeds especializados; revisa su encabezado antes de ejecutarlos.
 
