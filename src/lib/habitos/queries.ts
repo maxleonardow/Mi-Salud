@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { TIME_OF_DAY_ORDER, type HabitTimeOfDay, type HabitWithLog } from "./types";
+import { dayOfWeekInTimeZone, getDayRangeIso } from "@/lib/date";
 
 const supabase = createClient();
 
@@ -42,15 +43,12 @@ export function useTodayHabitLogs() {
   return useQuery({
     queryKey: ["habitos", "todayLogs"],
     queryFn: async () => {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setHours(23, 59, 59, 999);
+      const [todayStart, tomorrowStart] = getDayRangeIso();
       const { data, error } = await supabase
         .from("habit_logs")
         .select("*")
-        .gte("completed_at", todayStart.toISOString())
-        .lte("completed_at", todayEnd.toISOString());
+        .gte("completed_at", todayStart)
+        .lt("completed_at", tomorrowStart);
       if (error) throw error;
       return data;
     },
@@ -58,13 +56,13 @@ export function useTodayHabitLogs() {
 }
 
 export function useTodayHabits() {
-  const { data: habits, isLoading: habitsLoading } = useActiveHabits();
-  const { data: logs, isLoading: logsLoading } = useTodayHabitLogs();
+  const { data: habits, isLoading: habitsLoading, error: habitsError } = useActiveHabits();
+  const { data: logs, isLoading: logsLoading, error: logsError } = useTodayHabitLogs();
 
   const isLoading = habitsLoading || logsLoading;
 
   const { items, grouped, done, total } = useMemo(() => {
-    const today = new Date().getDay();
+    const today = dayOfWeekInTimeZone();
     const list: HabitWithLog[] = [];
 
     if (habits && logs) {
@@ -93,5 +91,5 @@ export function useTodayHabits() {
     return { items: list, grouped: grp, done: dk, total: list.length };
   }, [habits, logs]);
 
-  return { items, grouped, done, total, isLoading };
+  return { items, grouped, done, total, isLoading, error: habitsError ?? logsError };
 }

@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mi Salud
 
-## Getting Started
+Aplicación privada de salud para registrar hábitos, suplementos y entrenamientos en un solo lugar. Está construida como PWA con Next.js y guarda los datos en Supabase.
 
-First, run the development server:
+Producción: [health-app-tau-gold.vercel.app](https://health-app-tau-gold.vercel.app)
+
+## Funcionalidad
+
+- **Hoy:** resumen diario de entrenamiento, suplementos y hábitos.
+- **Suplementos:** catálogo, dosis, horarios, adherencia de siete días y stacks.
+- **Hábitos:** programación por día y momento, con registro diario.
+- **Mover:** plan semanal, sesiones, series e historial.
+- **Comer, Labs y Ajustes:** rutas preparadas para las siguientes iteraciones de producto.
+
+## Arquitectura
+
+- Next.js 16 App Router, React 19 y TypeScript.
+- Supabase Auth, Postgres, PostgREST y Row Level Security.
+- TanStack Query para consultas, caché y mutaciones del cliente.
+- Tailwind CSS v4 y componentes sobre Base UI.
+- Serwist para instalación PWA y caché del shell. Las escrituras de datos requieren conexión; todavía no existe una cola offline.
+- Vercel para despliegue.
+
+La aplicación admite una sola cuenta. `src/proxy.ts` hace el control de navegación optimista y la base de datos aplica la autorización definitiva mediante RLS. `ALLOWED_EMAIL` restringe además quién puede completar el magic link.
+
+## Desarrollo local
+
+Requisitos: Node.js compatible con Next.js 16, pnpm y un proyecto Supabase.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Variables requeridas:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+ALLOWED_EMAIL=propietario@example.com
+NEXT_PUBLIC_APP_TIME_ZONE=America/Monterrey
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+No agregues `.env.local`, tokens, contraseñas ni connection strings al repositorio.
 
-## Learn More
+## Verificación
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Playwright inicia una instancia exclusiva en el puerto `41737`. Se puede cambiar con `PLAYWRIGHT_PORT`; nunca reutiliza un servidor existente para evitar falsos positivos.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Base de datos
 
-## Deploy on Vercel
+Las migraciones están ordenadas en `supabase/migrations/`. Para una instalación o actualización, aplícalas en orden cronológico con Supabase CLI, `psql` o el SQL Editor del dashboard. Las migraciones más recientes:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. `20260623010000_supplement_cadences.sql`: corrige cadencias del catálogo inicial.
+2. `20260713000000_authenticated_rls.sql`: activa y normaliza RLS en todas las tablas.
+3. `20260713010000_atomic_catalog_writes.sql`: crea las RPC transaccionales de suplementos y stacks.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`supabase/apply-all.sql` es un bootstrap no destructivo para el catálogo y los hábitos iniciales. Usa `upsert` por usuario y nombre, conserva logs y respeta el estado activo de registros existentes. Los archivos de `supabase/seed/` son seeds especializados; revisa su encabezado antes de ejecutarlos.
+
+Después de cambiar el esquema remoto, recarga PostgREST con:
+
+```sql
+notify pgrst, 'reload schema';
+```
+
+Los tipos de `src/types/database.types.ts` se mantienen manualmente mientras no haya un Supabase local enlazado.
+
+## Seguridad y datos de salud
+
+- Todas las tablas personales deben tener RLS y políticas basadas en `auth.uid()`.
+- Las mutaciones nunca aceptan un `user_id` confiado desde la UI; lo obtienen de la sesión verificada.
+- Las operaciones que reemplazan relaciones se ejecutan en RPC atómicas para evitar datos parciales.
+- La app es una herramienta personal de registro, no un dispositivo médico ni una fuente de diagnóstico.
+
+La base de conocimiento utilizada para el contenido se encuentra en `docs/2026-06-22-health-bookmarks-knowledge.md`.

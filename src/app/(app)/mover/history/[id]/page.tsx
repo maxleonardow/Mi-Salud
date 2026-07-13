@@ -7,6 +7,7 @@ import { useSession, useSessionSetLogs } from "@/lib/mover/queries";
 import { createClient } from "@/lib/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { formatDateKey } from "@/lib/date";
 
 const supabase = createClient();
 
@@ -18,7 +19,7 @@ export default function HistoryDetailPage() {
   if (sLoading || lLoading) return <Skeleton className="h-96 w-full" />;
   if (!session) return <p>Sesión no encontrada.</p>;
 
-  const dateStr = new Date(session.date).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const dateStr = formatDateKey(session.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   // Group logs by exercise_id preserving order of appearance
   const exerciseOrder: string[] = [];

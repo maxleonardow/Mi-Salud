@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useRecentSessions } from "@/lib/mover/queries";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryError } from "@/components/ui/query-error";
+import { formatDateKey } from "@/lib/date";
 
 export function SessionList() {
-  const { data, isLoading } = useRecentSessions(50);
+  const { data, isLoading, error } = useRecentSessions(50);
 
   if (isLoading) return <Skeleton className="h-64 w-full rounded-xl" />;
+  if (error) return <QueryError message="No pudimos cargar tu historial." />;
   if (!data || data.length === 0) {
     return <p className="text-sm text-muted-foreground">Aún no hay sesiones registradas.</p>;
   }
@@ -15,7 +18,7 @@ export function SessionList() {
   return (
     <div className="space-y-2">
       {data.map(s => {
-        const dateStr = new Date(s.date).toLocaleDateString("es-MX", { weekday: "short", day: "numeric", month: "short" });
+        const dateStr = formatDateKey(s.date, { weekday: "short", day: "numeric", month: "short" });
         const statusBadge =
           s.status === "completed" ? "✓" : s.status === "in_progress" ? "⏱" : s.status === "skipped" ? "⤫" : "•";
         return (

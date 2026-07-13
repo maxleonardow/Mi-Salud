@@ -10,9 +10,10 @@ import { useHabits } from "@/lib/habitos/queries";
 import { TIME_OF_DAY_LABELS, type Habit } from "@/lib/habitos/types";
 import { HabitForm } from "./habit-form";
 import { toast } from "sonner";
+import { QueryError } from "@/components/ui/query-error";
 
 export function HabitList() {
-  const { data: habits, isLoading } = useHabits();
+  const { data: habits, isLoading, error } = useHabits();
   const deleteMutation = useDeleteHabit();
   const toggleMutation = useToggleHabit();
   const [editing, setEditing] = useState<Habit | null>(null);
@@ -27,6 +28,8 @@ export function HabitList() {
       </div>
     );
   }
+
+  if (error) return <QueryError message="No pudimos cargar tus hábitos." />;
 
   function handleDelete(id: string) {
     deleteMutation.mutate(id, {

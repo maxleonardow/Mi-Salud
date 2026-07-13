@@ -1,5 +1,6 @@
 -- =====================================================
 -- SUPPLEMENT SEED: tu stack personalizado (25 ítems)
+-- One-time seed. Prefer apply-all.sql for repeatable, non-destructive updates.
 -- Run AFTER auth.users has at least one user.
 -- =====================================================
 
@@ -9,6 +10,11 @@ begin
   select id into uid from auth.users limit 1;
   if uid is null then
     raise notice 'No users found — skipping supplement seed.';
+    return;
+  end if;
+
+  if exists (select 1 from public.supplements where user_id = uid and is_seed) then
+    raise notice 'Supplement seed already exists for user % — skipping.', uid;
     return;
   end if;
 

@@ -29,12 +29,20 @@ create table public.habit_logs (
 create index habit_logs_user_date on public.habit_logs(user_id, completed_at);
 create index habit_logs_habit    on public.habit_logs(habit_id);
 
--- RLS: deshabilitado a propósito para igualar al resto de la app.
--- Es una app personal local-first de un solo usuario; ninguna tabla usa RLS
--- (supplements, workouts, profiles, etc. corren con RLS off y sin sesión
--- autenticada). Activarlo solo aquí ocultaría los datos al usuario anónimo.
-alter table public.habits     disable row level security;
-alter table public.habit_logs disable row level security;
+alter table public.habits     enable row level security;
+alter table public.habit_logs enable row level security;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['habits', 'habit_logs']
+  loop
+    execute format('create policy %I on public.%I for select to authenticated using (auth.uid() = user_id)', t || '_select_own', t);
+    execute format('create policy %I on public.%I for insert to authenticated with check (auth.uid() = user_id)', t || '_insert_own', t);
+    execute format('create policy %I on public.%I for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id)', t || '_update_own', t);
+    execute format('create policy %I on public.%I for delete to authenticated using (auth.uid() = user_id)', t || '_delete_own', t);
+  end loop;
+end$$;
 
 create trigger habits_set_updated_at before update on public.habits
   for each row execute function public.tg_set_updated_at();

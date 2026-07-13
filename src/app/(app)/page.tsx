@@ -1,12 +1,13 @@
-"use client";
-
 import { ModuleHeader } from "@/components/layout/module-header";
 import { TodayBanner } from "@/components/mover/today-banner";
 import { DailyChecklist } from "@/components/suplementos/daily-checklist";
 import { HabitsChecklist } from "@/components/habitos/habits-checklist";
+import { formatAppDate } from "@/lib/date";
+import { connection } from "next/server";
 
-export default function HoyPage() {
-  const today = new Date().toLocaleDateString("es-MX", {
+export default async function HoyPage() {
+  await connection();
+  const today = formatAppDate(new Date(), {
     weekday: "long", day: "numeric", month: "long",
   });
 

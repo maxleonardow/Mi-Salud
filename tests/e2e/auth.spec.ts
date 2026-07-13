@@ -15,6 +15,6 @@ test("login page submits magic link request", async ({ page }) => {
   // invalid email format, signups not allowed, etc). Both prove the form
   // submitted and the server action was invoked end-to-end.
   await expect(
-    page.getByText(/Revisa tu email|rate limit|not allowed|invalid|requerido/i)
+    page.getByText(/Revisa tu email|rate limit|not allowed|no autorizado|invalid|requerido/i)
   ).toBeVisible({ timeout: 15_000 });
 });

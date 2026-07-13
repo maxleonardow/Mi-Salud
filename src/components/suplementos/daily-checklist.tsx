@@ -11,10 +11,11 @@ import {
 } from "@/lib/suplementos/types";
 import { CATEGORY_ICONS, CATEGORY_COLORS } from "./supplement-card";
 import { toast } from "sonner";
+import { QueryError } from "@/components/ui/query-error";
 
 export function DailyChecklist() {
-  const { grouped, taken, total, isLoading } = useDailyChecklist();
-  const adherence = useWeeklyAdherence();
+  const { grouped, taken, total, isLoading, error } = useDailyChecklist();
+  const adherenceQuery = useWeeklyAdherence();
   const logMutation = useLogSupplement();
   const undoMutation = useUndoLog();
 
@@ -27,6 +28,8 @@ export function DailyChecklist() {
       </div>
     );
   }
+
+  if (error) return <QueryError message="No pudimos cargar los suplementos de hoy." />;
 
   if (total === 0) {
     return (
@@ -72,9 +75,9 @@ export function DailyChecklist() {
           <p className="text-sm font-medium">
             {taken}/{total} tomados
           </p>
-          {adherence !== null && (
+          {adherenceQuery.adherence !== null && !adherenceQuery.error && (
             <p className="text-xs text-muted-foreground">
-              Adherencia semanal: {adherence}%
+              Adherencia semanal: {adherenceQuery.adherence}%
             </p>
           )}
         </div>

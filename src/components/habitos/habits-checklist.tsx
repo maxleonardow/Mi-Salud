@@ -6,9 +6,10 @@ import { useLogHabit, useUndoHabitLog } from "@/lib/habitos/mutations";
 import { useTodayHabits } from "@/lib/habitos/queries";
 import { TIME_OF_DAY_LABELS, TIME_OF_DAY_ORDER, type HabitTimeOfDay } from "@/lib/habitos/types";
 import { toast } from "sonner";
+import { QueryError } from "@/components/ui/query-error";
 
 export function HabitsChecklist() {
-  const { grouped, done, total, isLoading } = useTodayHabits();
+  const { grouped, done, total, isLoading, error } = useTodayHabits();
   const logMutation = useLogHabit();
   const undoMutation = useUndoHabitLog();
 
@@ -21,6 +22,8 @@ export function HabitsChecklist() {
       </div>
     );
   }
+
+  if (error) return <QueryError message="No pudimos cargar los hábitos de hoy." />;
 
   if (total === 0) {
     return (

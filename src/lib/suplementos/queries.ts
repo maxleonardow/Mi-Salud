@@ -10,6 +10,13 @@ import type {
   TimeOfDay,
 } from "./types";
 import { TIME_OF_DAY_ORDER } from "./types";
+import {
+  dayOfWeekForDateKey,
+  dayOfWeekInTimeZone,
+  getDateKey,
+  getDayRangeIso,
+  getLastDaysRange,
+} from "@/lib/date";
 
 const supabase = createClient();
 
@@ -65,16 +72,13 @@ export function useTodayLogs() {
   return useQuery({
     queryKey: ["suplementos", "todayLogs"],
     queryFn: async () => {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setHours(23, 59, 59, 999);
+      const [todayStart, tomorrowStart] = getDayRangeIso();
 
       const { data, error } = await supabase
         .from("supplement_logs")
         .select("*")
-        .gte("taken_at", todayStart.toISOString())
-        .lte("taken_at", todayEnd.toISOString());
+        .gte("taken_at", todayStart)
+        .lt("taken_at", tomorrowStart);
       if (error) throw error;
       return data;
     },
@@ -90,7 +94,7 @@ export function useLogsInRange(startDate: string, endDate: string) {
         .from("supplement_logs")
         .select("*")
         .gte("taken_at", startDate)
-        .lte("taken_at", endDate);
+        .lt("taken_at", endDate);
       if (error) throw error;
       return data;
     },
@@ -120,14 +124,14 @@ export function useStacks() {
 
 /** Build the daily checklist: supplements scheduled for today, grouped by time_of_day */
 export function useDailyChecklist() {
-  const { data: supplements, isLoading: supLoading } = useActiveSupplements();
-  const { data: logs, isLoading: logsLoading } = useTodayLogs();
+  const { data: supplements, isLoading: supLoading, error: supError } = useActiveSupplements();
+  const { data: logs, isLoading: logsLoading, error: logsError } = useTodayLogs();
 
   const isLoading = supLoading || logsLoading;
 
   const { items, grouped, taken, total } = useMemo(() => {
     const list: DailyChecklistItem[] = [];
-    const today = new Date().getDay(); // 0=Sunday
+    const today = dayOfWeekInTimeZone(); // 0=Sunday
 
     if (supplements && logs) {
       for (const sup of supplements) {
@@ -164,42 +168,64 @@ export function useDailyChecklist() {
     return { items: list, grouped: grp, taken: tk, total: list.length };
   }, [supplements, logs]);
 
-  return { items, grouped, taken, total, isLoading };
+  return { items, grouped, taken, total, isLoading, error: supError ?? logsError };
 }
 
 /** Weekly adherence: % of scheduled doses taken in the last 7 days */
 export function useWeeklyAdherence() {
   // Stable date strings: recalculate only once per hour to avoid infinite re-fetch
   const hourBucket = Math.floor(Date.now() / 3_600_000);
-  const [startStr, endStr] = useMemo(() => {
-    const end = new Date();
-    end.setMinutes(0, 0, 0);
-    const start = new Date(end);
-    start.setDate(start.getDate() - 7);
-    start.setHours(0, 0, 0, 0);
-    return [start.toISOString(), end.toISOString()] as const;
+  const range = useMemo(() => {
+    return getLastDaysRange(7);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hourBucket]);
 
-  const { data: supplements } = useActiveSupplements();
-  const { data: logs } = useLogsInRange(startStr, endStr);
+  const supplementsQuery = useActiveSupplements();
+  const logsQuery = useLogsInRange(range.startIso, range.endExclusiveIso);
+  const { data: supplements } = supplementsQuery;
+  const { data: logs } = logsQuery;
 
-  if (!supplements || !logs) return null;
+  if (!supplements || !logs) {
+    return {
+      adherence: null,
+      isLoading: supplementsQuery.isLoading || logsQuery.isLoading,
+      error: supplementsQuery.error ?? logsQuery.error,
+    };
+  }
 
   // Count expected doses: for each supplement's schedule, count matching days
   let expected = 0;
   for (const sup of supplements) {
     for (const sched of sup.supplement_schedules) {
-      for (let d = 0; d < 7; d++) {
-        const date = new Date(startStr);
-        date.setDate(date.getDate() + d);
-        if (sched.days_of_week.includes(date.getDay())) {
+      for (const dateKey of range.dateKeys) {
+        if (sched.days_of_week.includes(dayOfWeekForDateKey(dateKey))) {
           expected++;
         }
       }
     }
   }
 
-  const takenCount = logs.filter((l) => !l.skipped).length;
-  return expected > 0 ? Math.round((takenCount / expected) * 100) : 100;
+  const expectedKeys = new Set<string>();
+  for (const sup of supplements) {
+    for (const sched of sup.supplement_schedules) {
+      for (const dateKey of range.dateKeys) {
+        if (sched.days_of_week.includes(dayOfWeekForDateKey(dateKey))) {
+          expectedKeys.add(`${sched.id}:${dateKey}`);
+        }
+      }
+    }
+  }
+
+  const takenKeys = new Set(
+    logs
+      .filter((log) => !log.skipped && log.schedule_id)
+      .map((log) => `${log.schedule_id}:${getDateKey(new Date(log.taken_at))}`)
+      .filter((key) => expectedKeys.has(key))
+  );
+  const takenCount = takenKeys.size;
+  const adherence = expected > 0
+    ? Math.min(100, Math.round((takenCount / expected) * 100))
+    : 100;
+
+  return { adherence, isLoading: false, error: null };
 }

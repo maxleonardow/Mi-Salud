@@ -33,10 +33,11 @@ import { stackFormSchema, type StackFormValues } from "@/lib/suplementos/schemas
 import type { StackWithItems } from "@/lib/suplementos/types";
 import { SupplementCard } from "./supplement-card";
 import { toast } from "sonner";
+import { QueryError } from "@/components/ui/query-error";
 
 export function StackBuilder() {
-  const { data: stacks, isLoading: stacksLoading } = useStacks();
-  const { data: supplements, isLoading: supsLoading } = useSupplements();
+  const { data: stacks, isLoading: stacksLoading, error: stacksError } = useStacks();
+  const { data: supplements, isLoading: supsLoading, error: supsError } = useSupplements();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<StackWithItems | null>(null);
 
@@ -115,6 +116,10 @@ export function StackBuilder() {
         ))}
       </div>
     );
+  }
+
+  if (stacksError || supsError) {
+    return <QueryError message="No pudimos cargar tus stacks de suplementos." />;
   }
 
   const activeSups = (supplements ?? []).filter((s) => s.active);

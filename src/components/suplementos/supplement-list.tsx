@@ -24,9 +24,10 @@ import type { Supplement } from "@/lib/suplementos/types";
 import { SupplementCard } from "./supplement-card";
 import { SupplementForm } from "./supplement-form";
 import { toast } from "sonner";
+import { QueryError } from "@/components/ui/query-error";
 
 export function SupplementList() {
-  const { data: supplements, isLoading } = useSupplements();
+  const { data: supplements, isLoading, error } = useSupplements();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<Supplement | null>(null);
 
@@ -36,7 +37,11 @@ export function SupplementList() {
   const deleteMutation = useDeleteSupplement();
 
   // Load schedules for the supplement being edited
-  const { data: editSchedules } = useSupplementSchedules(editing?.id);
+  const {
+    data: editSchedules,
+    isLoading: editSchedulesLoading,
+    error: editSchedulesError,
+  } = useSupplementSchedules(editing?.id);
 
   function handleNew() {
     setEditing(null);
@@ -104,6 +109,8 @@ export function SupplementList() {
     );
   }
 
+  if (error) return <QueryError message="No pudimos cargar tus suplementos." />;
+
   const active = (supplements ?? []).filter((s) => s.active);
   const inactive = (supplements ?? []).filter((s) => !s.active);
 
@@ -164,20 +171,29 @@ export function SupplementList() {
             </SheetDescription>
           </SheetHeader>
           <div className="px-4 pb-4">
-            <SupplementForm
-              key={editing?.id ?? "new"}
-              defaultValues={
-                editing
-                  ? { ...editing, supplement_schedules: editSchedules ?? [] }
-                  : undefined
-              }
-              onSubmit={handleSubmit}
-              isPending={createMutation.isPending || updateMutation.isPending}
-              onCancel={() => {
-                setSheetOpen(false);
-                setEditing(null);
-              }}
-            />
+            {editing && editSchedulesLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            ) : editSchedulesError ? (
+              <QueryError message="No pudimos cargar los horarios del suplemento." />
+            ) : (
+              <SupplementForm
+                key={editing?.id ?? "new"}
+                defaultValues={
+                  editing
+                    ? { ...editing, supplement_schedules: editSchedules ?? [] }
+                    : undefined
+                }
+                onSubmit={handleSubmit}
+                isPending={createMutation.isPending || updateMutation.isPending}
+                onCancel={() => {
+                  setSheetOpen(false);
+                  setEditing(null);
+                }}
+              />
+            )}
             {editing && (
               <Button
                 variant="destructive"

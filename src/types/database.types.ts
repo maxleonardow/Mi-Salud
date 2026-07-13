@@ -643,7 +643,31 @@ export interface Database {
       };
     };
     Views: {};
-    Functions: {};
+    Functions: {
+      save_supplement: {
+        Args: {
+          p_id: string | null;
+          p_name: string;
+          p_brand: string | null;
+          p_form: string;
+          p_dose_amount: number;
+          p_dose_unit: string;
+          p_category: string;
+          p_notes: string | null;
+          p_schedules: unknown;
+        };
+        Returns: Database["public"]["Tables"]["supplements"]["Row"];
+      };
+      save_supplement_stack: {
+        Args: {
+          p_id: string | null;
+          p_name: string;
+          p_description: string | null;
+          p_supplement_ids: string[];
+        };
+        Returns: Database["public"]["Tables"]["supplement_stacks"]["Row"];
+      };
+    };
     Enums: {};
   };
 }

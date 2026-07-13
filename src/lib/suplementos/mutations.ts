@@ -2,49 +2,28 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { requireUserId } from "@/lib/supabase/auth";
 import type { SupplementFormValues, StackFormValues } from "./schemas";
 
 const supabase = createClient();
-const USER_ID = "c44deaea-9de2-4eb2-b552-307fac7ecfdf";
 
 /** Create a new supplement with schedules */
 export function useCreateSupplement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: SupplementFormValues) => {
-
-      const { data: supplement, error } = await supabase
-        .from("supplements")
-        .insert({
-          user_id: USER_ID,
-          name: values.name,
-          brand: values.brand || null,
-          form: values.form,
-          dose_amount: values.dose_amount,
-          dose_unit: values.dose_unit,
-          category: values.category,
-          notes: values.notes || null,
-        })
-        .select()
-        .single();
+      const { data: supplement, error } = await supabase.rpc("save_supplement", {
+        p_id: null,
+        p_name: values.name,
+        p_brand: values.brand || null,
+        p_form: values.form,
+        p_dose_amount: values.dose_amount,
+        p_dose_unit: values.dose_unit,
+        p_category: values.category,
+        p_notes: values.notes || null,
+        p_schedules: values.schedules,
+      });
       if (error) throw error;
-
-      // Insert schedules
-      if (values.schedules.length > 0) {
-        const { error: schedError } = await supabase
-          .from("supplement_schedules")
-          .insert(
-            values.schedules.map((s) => ({
-              supplement_id: supplement.id,
-              user_id: USER_ID,
-              time_of_day: s.time_of_day,
-              days_of_week: s.days_of_week,
-              reminder: s.reminder,
-            }))
-          );
-        if (schedError) throw schedError;
-      }
-
       return supplement;
     },
     onSuccess: () => {
@@ -64,45 +43,18 @@ export function useUpdateSupplement() {
       id: string;
       values: SupplementFormValues;
     }) => {
-
-      const { data: supplement, error } = await supabase
-        .from("supplements")
-        .update({
-          name: values.name,
-          brand: values.brand || null,
-          form: values.form,
-          dose_amount: values.dose_amount,
-          dose_unit: values.dose_unit,
-          category: values.category,
-          notes: values.notes || null,
-        })
-        .eq("id", id)
-        .select()
-        .single();
+      const { data: supplement, error } = await supabase.rpc("save_supplement", {
+        p_id: id,
+        p_name: values.name,
+        p_brand: values.brand || null,
+        p_form: values.form,
+        p_dose_amount: values.dose_amount,
+        p_dose_unit: values.dose_unit,
+        p_category: values.category,
+        p_notes: values.notes || null,
+        p_schedules: values.schedules,
+      });
       if (error) throw error;
-
-      // Replace schedules: delete old, insert new
-      const { error: delSchedError } = await supabase
-        .from("supplement_schedules")
-        .delete()
-        .eq("supplement_id", id);
-      if (delSchedError) throw delSchedError;
-
-      if (values.schedules.length > 0) {
-        const { error: schedError } = await supabase
-          .from("supplement_schedules")
-          .insert(
-            values.schedules.map((s) => ({
-              supplement_id: id,
-              user_id: USER_ID,
-              time_of_day: s.time_of_day,
-              days_of_week: s.days_of_week,
-              reminder: s.reminder,
-            }))
-          );
-        if (schedError) throw schedError;
-      }
-
       return supplement;
     },
     onSuccess: () => {
@@ -160,11 +112,12 @@ export function useLogSupplement() {
       skipped?: boolean;
       notes?: string;
     }) => {
+      const userId = await requireUserId(supabase);
 
       const { data, error } = await supabase
         .from("supplement_logs")
         .insert({
-          user_id: USER_ID,
+          user_id: userId,
           supplement_id: supplementId,
           schedule_id: scheduleId,
           taken_at: new Date().toISOString(),
@@ -204,31 +157,13 @@ export function useCreateStack() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: StackFormValues) => {
-
-      const { data: stack, error } = await supabase
-        .from("supplement_stacks")
-        .insert({
-          user_id: USER_ID,
-          name: values.name,
-          description: values.description || null,
-        })
-        .select()
-        .single();
+      const { data: stack, error } = await supabase.rpc("save_supplement_stack", {
+        p_id: null,
+        p_name: values.name,
+        p_description: values.description || null,
+        p_supplement_ids: values.supplement_ids,
+      });
       if (error) throw error;
-
-      if (values.supplement_ids.length > 0) {
-        const { error: itemsError } = await supabase
-          .from("supplement_stack_items")
-          .insert(
-            values.supplement_ids.map((sid, idx) => ({
-              stack_id: stack.id,
-              supplement_id: sid,
-              order: idx,
-            }))
-          );
-        if (itemsError) throw itemsError;
-      }
-
       return stack;
     },
     onSuccess: () => {
@@ -242,37 +177,13 @@ export function useUpdateStack() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, values }: { id: string; values: StackFormValues }) => {
-      const { data: stack, error } = await supabase
-        .from("supplement_stacks")
-        .update({
-          name: values.name,
-          description: values.description || null,
-        })
-        .eq("id", id)
-        .select()
-        .single();
+      const { data: stack, error } = await supabase.rpc("save_supplement_stack", {
+        p_id: id,
+        p_name: values.name,
+        p_description: values.description || null,
+        p_supplement_ids: values.supplement_ids,
+      });
       if (error) throw error;
-
-      // Replace items
-      const { error: delItemsError } = await supabase
-        .from("supplement_stack_items")
-        .delete()
-        .eq("stack_id", id);
-      if (delItemsError) throw delItemsError;
-
-      if (values.supplement_ids.length > 0) {
-        const { error: itemsError } = await supabase
-          .from("supplement_stack_items")
-          .insert(
-            values.supplement_ids.map((sid, idx) => ({
-              stack_id: id,
-              supplement_id: sid,
-              order: idx,
-            }))
-          );
-        if (itemsError) throw itemsError;
-      }
-
       return stack;
     },
     onSuccess: () => {

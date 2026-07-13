@@ -3,15 +3,17 @@
 import { useActivePlan, usePlanSchedule } from "@/lib/mover/queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dayOfWeek } from "@/lib/mover/today";
+import { QueryError } from "@/components/ui/query-error";
 
 const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 export function PlanWeekView() {
-  const { data: plan, isLoading: planLoading } = useActivePlan();
-  const { data: slots, isLoading: slotsLoading } = usePlanSchedule(plan?.id);
+  const { data: plan, isLoading: planLoading, error: planError } = useActivePlan();
+  const { data: slots, isLoading: slotsLoading, error: slotsError } = usePlanSchedule(plan?.id);
   const todayDow = dayOfWeek(new Date());
 
   if (planLoading || slotsLoading) return <Skeleton className="h-64 w-full rounded-xl" />;
+  if (planError || slotsError) return <QueryError message="No pudimos cargar tu plan semanal." />;
   if (!plan) return <p className="text-sm text-muted-foreground">Sin plan activo.</p>;
 
   const ordered = [1, 2, 3, 4, 5, 6, 0].map(dow => {

@@ -5,7 +5,7 @@ export type ScheduleSlot = {
 };
 
 export function dayOfWeek(date: Date): number {
-  return date.getUTCDay();
+  return dayOfWeekInTimeZone(date);
 }
 
 export function findScheduleSlotForToday<T extends ScheduleSlot>(
@@ -15,3 +15,4 @@ export function findScheduleSlotForToday<T extends ScheduleSlot>(
   const dow = dayOfWeek(date);
   return slots.find(s => s.day_of_week === dow);
 }
+import { dayOfWeekInTimeZone } from "@/lib/date";

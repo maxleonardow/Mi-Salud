@@ -6,11 +6,9 @@
 --   (0=Dom 1=Lun 2=Mar 3=Mié 4=Jue 5=Vie 6=Sáb)
 -- =====================================================
 do $$
-declare uid uuid := 'c44deaea-9de2-4eb2-b552-307fac7ecfdf';
+declare uid uuid;
 begin
-  if not exists (select 1 from auth.users where id = uid) then
-    select id into uid from auth.users limit 1;
-  end if;
+  select id into uid from auth.users order by created_at asc limit 1;
   if uid is null then return; end if;
 
   -- Quitar Sea Moss (schedules en cascada)

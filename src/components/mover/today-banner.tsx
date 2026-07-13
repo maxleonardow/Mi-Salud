@@ -6,17 +6,22 @@ import { useStartSession } from "@/lib/mover/mutations";
 import { findScheduleSlotForToday } from "@/lib/mover/today";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryError } from "@/components/ui/query-error";
 
 export function TodayBanner() {
   const router = useRouter();
-  const { data: plan, isLoading: planLoading } = useActivePlan();
-  const { data: slots, isLoading: slotsLoading } = usePlanSchedule(plan?.id);
+  const { data: plan, isLoading: planLoading, error: planError } = useActivePlan();
+  const { data: slots, isLoading: slotsLoading, error: slotsError } = usePlanSchedule(plan?.id);
   const slot = slots ? findScheduleSlotForToday(slots) : undefined;
   const templateId = slot?.template_id ?? undefined;
-  const { data: exercises, isLoading: exLoading } = useTemplateExercises(templateId);
+  const { data: exercises, isLoading: exLoading, error: exercisesError } = useTemplateExercises(templateId);
   const startSession = useStartSession();
 
   if (planLoading || slotsLoading) return <Skeleton className="h-32 w-full rounded-xl" />;
+
+  if (planError || slotsError || exercisesError) {
+    return <QueryError message="No pudimos cargar el entrenamiento de hoy." />;
+  }
 
   if (!plan) {
     return (

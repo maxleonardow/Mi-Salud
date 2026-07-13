@@ -2,18 +2,19 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { requireUserId } from "@/lib/supabase/auth";
 import type { HabitInsert, HabitUpdate } from "./types";
 
 const supabase = createClient();
-const USER_ID = "c44deaea-9de2-4eb2-b552-307fac7ecfdf";
 
 export function useCreateHabit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: Omit<HabitInsert, "user_id">) => {
+      const userId = await requireUserId(supabase);
       const { data, error } = await supabase
         .from("habits")
-        .insert({ ...values, user_id: USER_ID })
+        .insert({ ...values, user_id: userId })
         .select()
         .single();
       if (error) throw error;
@@ -72,9 +73,10 @@ export function useLogHabit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (habitId: string) => {
+      const userId = await requireUserId(supabase);
       const { data, error } = await supabase
         .from("habit_logs")
-        .insert({ user_id: USER_ID, habit_id: habitId, completed_at: new Date().toISOString() })
+        .insert({ user_id: userId, habit_id: habitId, completed_at: new Date().toISOString() })
         .select()
         .single();
       if (error) throw error;
