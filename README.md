@@ -9,7 +9,7 @@ Producción: [health-app-tau-gold.vercel.app](https://health-app-tau-gold.vercel
 - **Hoy:** resumen diario de entrenamiento, suplementos y hábitos.
 - **Suplementos:** catálogo, dosis, horarios, adherencia de siete días y stacks.
 - **Hábitos:** programación por día y momento, con registro diario.
-- **Mover:** plan semanal, sesiones, series e historial.
+- **Mover:** instalador de plan base A/B, semana de fuerza + Zona 2, sesiones, series e historial.
 - **Comer:** registro diario de alimentos, macros, edición e historial.
 - **Labs:** resultados de biomarcadores, rangos del reporte, resumen e historial.
 - **Ajustes:** perfil, unidades, apariencia, seguridad y cierre de sesión.
@@ -54,9 +54,12 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm test:e2e
+pnpm test:db
 ```
 
 Playwright inicia una instancia exclusiva en el puerto `41737`. Se puede cambiar con `PLAYWRIGHT_PORT`; nunca reutiliza un servidor existente para evitar falsos positivos.
+`pnpm test:db` requiere `supabase start` y valida privilegios, aislamiento RLS,
+RPC transaccionales y denegación del rol anónimo dentro de una transacción reversible.
 
 ## Base de datos
 
@@ -67,6 +70,8 @@ Las migraciones están ordenadas en `supabase/migrations/`. Para una instalació
 3. `20260713010000_atomic_catalog_writes.sql`: crea las RPC transaccionales de suplementos y stacks.
 4. `20260713020000_nutrition_tracking.sql`: agrega registros privados de alimentación.
 5. `20260713030000_biomarker_tracking.sql`: agrega resultados privados de biomarcadores.
+6. `20260713040000_authenticated_privileges.sql`: concede CRUD explícito al rol autenticado y revoca acceso directo al rol anónimo.
+7. `20260713050000_default_workout_plan.sql`: permite instalar desde Mover un plan base A/B con dos días de fuerza y 150 minutos de Zona 2.
 
 `supabase/apply-all.sql` es un bootstrap no destructivo para el catálogo y los hábitos iniciales. Usa `upsert` por usuario y nombre, conserva logs y respeta el estado activo de registros existentes. Los archivos de `supabase/seed/` son seeds especializados; revisa su encabezado antes de ejecutarlos.
 

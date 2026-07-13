@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:db": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -X -v ON_ERROR_STOP=1 -f tests/sql/database-smoke.sql",
     "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
     "typecheck": "tsc --noEmit"
   },

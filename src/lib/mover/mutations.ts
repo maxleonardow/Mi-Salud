@@ -7,6 +7,20 @@ import { isPr } from "./compute-pr";
 
 const supabase = createClient();
 
+export function useInstallDefaultWorkoutPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("install_default_workout_plan");
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mover"] });
+    },
+  });
+}
+
 export function useStartSession() {
   const qc = useQueryClient();
   return useMutation({

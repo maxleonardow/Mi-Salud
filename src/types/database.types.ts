@@ -737,6 +737,10 @@ export interface Database {
     };
     Views: {};
     Functions: {
+      install_default_workout_plan: {
+        Args: never;
+        Returns: Database["public"]["Tables"]["workout_plans"]["Row"];
+      };
       save_supplement: {
         Args: {
           p_id: string | null;

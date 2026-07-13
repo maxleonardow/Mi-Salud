@@ -7,6 +7,7 @@ import { findScheduleSlotForToday } from "@/lib/mover/today";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/ui/query-error";
+import { DefaultPlanInstaller } from "@/components/mover/default-plan-installer";
 
 export function TodayBanner() {
   const router = useRouter();
@@ -24,11 +25,7 @@ export function TodayBanner() {
   }
 
   if (!plan) {
-    return (
-      <div className="rounded-xl border border-[var(--border-strong)] bg-[var(--surface-alt)] p-5 text-center">
-        <p className="text-sm text-muted-foreground">No tienes un plan activo. Aplica el seed SQL en Supabase para arrancar.</p>
-      </div>
-    );
+    return <DefaultPlanInstaller />;
   }
 
   if (!slot) {

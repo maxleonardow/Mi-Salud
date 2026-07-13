@@ -54,8 +54,9 @@ Copia `.env.example` a `.env.local`:
   SELECT/INSERT/UPDATE/DELETE con `auth.uid() = user_id` (o heredar ownership del padre).
 - **Nunca hardcodees `USER_ID`.** Las mutaciones obtienen el usuario validado con
   `requireUserId()`; `ALLOWED_EMAIL` limita el acceso al propietario de la app.
-- **`src/types/database.types.ts` se mantiene A MANO** (no hay Supabase local para `db:types`).
-  Si cambias el esquema, actualiza ese archivo manualmente para que compile.
+- **`src/types/database.types.ts` se mantiene A MANO** para conservar diffs revisables.
+  Si cambias el esquema, actualiza ese archivo manualmente y contrástalo con `pnpm db:types`
+  cuando el entorno local de Supabase esté iniciado.
 - Todos los hooks de query/mutación son `"use client"`, usan `createClient()` de
   `@/lib/supabase/client` y TanStack Query. Sigue el patrón existente en `src/lib/<módulo>/`.
 - Todo cálculo de “hoy” usa `src/lib/date.ts`; no dependas de la zona horaria del servidor
@@ -74,6 +75,8 @@ Copia `.env.example` a `.env.local`:
   recargar. Ejecuta `notify pgrst, 'reload schema';` después de crear tablas.
 - Aplicar a remoto: `psql` con la connection string directa, o el SQL Editor del dashboard.
   (El CLI `supabase db push` requiere `supabase link` con access token + db password.)
+- Validación local completa: `supabase start` y después `pnpm test:db`. La prueba revierte
+  sus fixtures y verifica grants, RLS entre dos usuarios, RPC y denegación anónima.
 
 ## Estado / pendientes
 
@@ -85,9 +88,11 @@ Copia `.env.example` a `.env.local`:
   agrega las RPC transaccionales requeridas por las mutaciones de suplementos y stacks.
 - **Migraciones `20260713020000_nutrition_tracking.sql` y `20260713030000_biomarker_tracking.sql`
   NO aplicadas al remoto todavía** — crean las tablas requeridas por Comer y Labs.
-- **Plan de ejercicio (Mover):** se diseñó una calibración (plantillas A/B en formato superset
-  de 45 min + cardio Zona 2 en días sueltos) pero **aún no está montada** en el módulo. Ver
-  `supabase/seed/workout-seed.sql` para la estructura actual del plan.
+- **Migración `20260713040000_authenticated_privileges.sql` NO aplicada al remoto todavía** —
+  concede privilegios SQL explícitos al rol autenticado y revoca acceso directo a `anon`.
+- **Migración `20260713050000_default_workout_plan.sql` NO aplicada al remoto todavía** —
+  instala desde la UI un plan base A/B de 45 min y 150 min semanales de Zona 2 sin reemplazar
+  planes activos. `supabase/seed/workout-seed.sql` queda como seed legado de catálogo amplio.
 
 ## Contexto de salud
 

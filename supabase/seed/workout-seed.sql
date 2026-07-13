@@ -273,7 +273,16 @@ end$$;
 
 -- =====================================================
 -- DAILY TIPS — system seed (user_id = NULL, visible to all)
+-- This catalog requires an administrative SQL session. Authenticated users
+-- can install their personal workout without failing on the global rows.
 -- =====================================================
+
+do $$
+begin
+  if auth.uid() is not null then
+    raise notice 'Skipping global daily tips for authenticated workout seed';
+    return;
+  end if;
 
 insert into public.daily_tips (user_id, category, title, content, priority, is_seed) values
   -- Sleep (8)
@@ -322,3 +331,5 @@ insert into public.daily_tips (user_id, category, title, content, priority, is_s
   (NULL, 'supplement', 'Whey post-entreno', 'Toma tu whey en los 30-60 min post-entreno para máxima síntesis muscular. 25g = 1 scoop.', 4, true),
   (NULL, 'supplement', 'Vitamina D3 + K2 con grasa', 'Es liposoluble. Tómala con tu comida más grasa del día (huevos AM, aguacate, salmón) para mejor absorción.', 4, true),
   (NULL, 'supplement', 'Omega 3 con comida', 'Nunca en ayunas. Con comida para mejor absorción. 2g EPA/DHA/día reduce inflamación sistémica.', 4, true);
+end
+$$;
