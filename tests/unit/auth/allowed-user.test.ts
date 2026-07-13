@@ -19,9 +19,8 @@ describe("isAllowedUserEmail", () => {
     expect(isAllowedUserEmail("other@example.com")).toBe(false);
   });
 
-  it("fails closed when ALLOWED_EMAIL is missing", () => {
+  it("allows an existing Auth user when the optional allowlist is missing", () => {
     delete process.env.ALLOWED_EMAIL;
-    expect(isAllowedUserEmail("owner@example.com")).toBe(false);
+    expect(isAllowedUserEmail("owner@example.com")).toBe(true);
   });
 });
-

@@ -21,7 +21,7 @@ Producción: [health-app-tau-gold.vercel.app](https://health-app-tau-gold.vercel
 - Serwist para instalación PWA y caché del shell. Las escrituras de datos requieren conexión; todavía no existe una cola offline.
 - Vercel para despliegue.
 
-La aplicación admite una sola cuenta. `src/proxy.ts` hace el control de navegación optimista y la base de datos aplica la autorización definitiva mediante RLS. `ALLOWED_EMAIL` restringe además quién puede completar el magic link.
+La aplicación admite una sola cuenta. `src/proxy.ts` hace el control de navegación optimista y la base de datos aplica la autorización definitiva mediante RLS. El login nunca crea usuarios nuevos (`shouldCreateUser: false`); `ALLOWED_EMAIL` agrega una allowlist explícita cuando está configurada.
 
 ## Desarrollo local
 
@@ -38,6 +38,7 @@ Variables requeridas:
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+# Recomendado: capa adicional sobre los usuarios ya existentes en Auth
 ALLOWED_EMAIL=propietario@example.com
 NEXT_PUBLIC_APP_TIME_ZONE=America/Monterrey
 ```

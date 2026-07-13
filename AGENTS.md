@@ -34,7 +34,7 @@ pnpm test:e2e    # playwright
 Copia `.env.example` a `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `ALLOWED_EMAIL` — único email autorizado para iniciar sesión
+- `ALLOWED_EMAIL` — allowlist recomendada; si falta, solo entran usuarios ya existentes en Supabase Auth
 - `NEXT_PUBLIC_APP_TIME_ZONE` — calendario civil usado en toda la app (default `America/Monterrey`)
 
 ## Módulos (rutas en `src/app/(app)/`)
