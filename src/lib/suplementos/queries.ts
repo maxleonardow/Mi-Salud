@@ -39,7 +39,7 @@ export function useActiveSupplements() {
         .eq("active", true)
         .order("name");
       if (error) throw error;
-      return data as SupplementWithSchedules[];
+      return data as unknown as SupplementWithSchedules[];
     },
   });
 }
@@ -107,12 +107,13 @@ export function useStacks() {
         .select("*, supplement_stack_items(*, supplement:supplements(*))")
         .order("name");
       if (error) throw error;
-      return (data ?? []).map((stack) => ({
+      const raw = data as unknown as StackWithItems[];
+      return (raw ?? []).map((stack) => ({
         ...stack,
         supplement_stack_items: (stack.supplement_stack_items ?? []).sort(
           (a: { order: number }, b: { order: number }) => a.order - b.order
         ),
-      })) as StackWithItems[];
+      }));
     },
   });
 }

@@ -1,13 +1,44 @@
+"use client";
+
 import { ModuleHeader } from "@/components/layout/module-header";
+import { TodayBanner } from "@/components/mover/today-banner";
+import { DailyChecklist } from "@/components/suplementos/daily-checklist";
+import { HabitsChecklist } from "@/components/habitos/habits-checklist";
 
 export default function HoyPage() {
   const today = new Date().toLocaleDateString("es-MX", {
     weekday: "long", day: "numeric", month: "long",
   });
+
   return (
     <>
       <ModuleHeader title="Hoy" meta={today} />
-      <p className="text-sm text-muted-foreground">Próximamente.</p>
+
+      <div className="space-y-8">
+        {/* Ejercicio */}
+        <section>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-3">
+            Ejercicio
+          </p>
+          <TodayBanner />
+        </section>
+
+        {/* Suplementos */}
+        <section>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-3">
+            Suplementos
+          </p>
+          <DailyChecklist />
+        </section>
+
+        {/* Hábitos */}
+        <section>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-3">
+            Hábitos
+          </p>
+          <HabitsChecklist />
+        </section>
+      </div>
     </>
   );
 }

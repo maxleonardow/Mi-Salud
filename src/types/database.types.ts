@@ -425,7 +425,7 @@ export interface Database {
           id: string;
           supplement_id: string;
           user_id: string;
-          time_of_day: "manana" | "mediodia" | "tarde" | "noche" | "con_comida" | "antes_dormir";
+          time_of_day: "ayunas" | "desayuno" | "cena" | "noche" | "antes_dormir";
           days_of_week: number[];
           reminder: boolean;
           created_at: string;
@@ -435,7 +435,7 @@ export interface Database {
           id?: string;
           supplement_id: string;
           user_id: string;
-          time_of_day: "manana" | "mediodia" | "tarde" | "noche" | "con_comida" | "antes_dormir";
+          time_of_day: "ayunas" | "desayuno" | "cena" | "noche" | "antes_dormir";
           days_of_week?: number[];
           reminder?: boolean;
           created_at?: string;
@@ -445,7 +445,7 @@ export interface Database {
           id?: string;
           supplement_id?: string;
           user_id?: string;
-          time_of_day?: "manana" | "mediodia" | "tarde" | "noche" | "con_comida" | "antes_dormir";
+          time_of_day?: "ayunas" | "desayuno" | "cena" | "noche" | "antes_dormir";
           days_of_week?: number[];
           reminder?: boolean;
           created_at?: string;
@@ -533,6 +533,72 @@ export interface Database {
           stack_id?: string;
           supplement_id?: string;
           order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      habits: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          description: string | null;
+          emoji: string | null;
+          time_of_day: "manana" | "tarde" | "noche" | "cualquier";
+          days_of_week: number[];
+          active: boolean;
+          order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          description?: string | null;
+          emoji?: string | null;
+          time_of_day: "manana" | "tarde" | "noche" | "cualquier";
+          days_of_week?: number[];
+          active?: boolean;
+          order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          description?: string | null;
+          emoji?: string | null;
+          time_of_day?: "manana" | "tarde" | "noche" | "cualquier";
+          days_of_week?: number[];
+          active?: boolean;
+          order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      habit_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          habit_id: string;
+          completed_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          habit_id: string;
+          completed_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          habit_id?: string;
+          completed_at?: string;
           created_at?: string;
         };
         Relationships: [];

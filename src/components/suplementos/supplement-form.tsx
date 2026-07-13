@@ -50,7 +50,8 @@ export function SupplementForm({
   onCancel,
 }: Props) {
   const form = useForm<SupplementFormValues>({
-    resolver: zodResolver(supplementFormSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(supplementFormSchema) as any,
     defaultValues: {
       name: defaultValues?.name ?? "",
       brand: defaultValues?.brand ?? "",
@@ -65,7 +66,7 @@ export function SupplementForm({
         reminder: s.reminder,
       })) ?? [
         {
-          time_of_day: "manana" as TimeOfDay,
+          time_of_day: "ayunas" as TimeOfDay,
           days_of_week: [0, 1, 2, 3, 4, 5, 6],
           reminder: false,
         },
@@ -219,7 +220,7 @@ export function SupplementForm({
               size="xs"
               onClick={() =>
                 append({
-                  time_of_day: "manana",
+                  time_of_day: "ayunas",
                   days_of_week: [0, 1, 2, 3, 4, 5, 6],
                   reminder: false,
                 })

@@ -63,3 +63,6 @@ public/swe-worker-*.js
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code
+.claude/

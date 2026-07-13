@@ -64,19 +64,17 @@ export const CATEGORY_LABELS: Record<SupplementCategory, string> = {
 };
 
 export const TIME_OF_DAY_LABELS: Record<TimeOfDay, string> = {
-  manana: "Mañana",
-  mediodia: "Mediodía",
-  tarde: "Tarde",
-  noche: "Noche",
-  con_comida: "Con comida",
+  ayunas:       "En ayunas",
+  desayuno:     "Con el desayuno",
+  cena:         "Con la cena",
+  noche:        "Por la noche",
   antes_dormir: "Antes de dormir",
 };
 
 export const TIME_OF_DAY_ORDER: TimeOfDay[] = [
-  "manana",
-  "mediodia",
-  "con_comida",
-  "tarde",
+  "ayunas",
+  "desayuno",
+  "cena",
   "noche",
   "antes_dormir",
 ];
