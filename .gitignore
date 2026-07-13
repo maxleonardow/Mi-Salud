@@ -55,6 +55,7 @@ supabase/.temp
 
 # Service worker (generated)
 public/sw.js
+public/sw-private.js
 public/swe-worker-*.js
 
 # Vercel
