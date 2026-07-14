@@ -5,16 +5,31 @@ test("logged-out user is redirected to login", async ({ page }) => {
   await expect(page).toHaveURL(/\/login/);
   await expect(page.getByRole("heading", { name: "Mi Salud" })).toBeVisible();
   await expect(page.getByLabel("Email")).toBeVisible();
+  await expect(page.getByLabel("Contraseña")).toBeVisible();
 });
 
-test("login page submits magic link request", async ({ page }) => {
+test("login page submits password credentials", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Email").fill("test+playwright@example.com");
-  await page.getByRole("button", { name: /magic link/i }).click();
-  // Either we see the success state OR any Supabase error response (rate limit,
-  // invalid email format, signups not allowed, etc). Both prove the form
-  // submitted and the server action was invoked end-to-end.
+  await page.getByLabel("Contraseña").fill("not-the-real-password");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await expect(page.getByText("Email o contraseña incorrectos")).toBeVisible({
+    timeout: 15_000,
+  });
+});
+
+test("password recovery page is public", async ({ page }) => {
+  await page.goto("/recuperar-contrasena");
   await expect(
-    page.getByText(/Revisa tu email|rate limit|not allowed|no autorizado|invalid|requerido/i)
-  ).toBeVisible({ timeout: 15_000 });
+    page.getByRole("heading", { name: "Crear o recuperar contraseña" })
+  ).toBeVisible();
+  await expect(page.getByLabel("Email")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Enviar recuperación" })
+  ).toBeVisible();
+});
+
+test("password update page requires a recovery session", async ({ page }) => {
+  await page.goto("/actualizar-contrasena");
+  await expect(page).toHaveURL(/\/login/);
 });
