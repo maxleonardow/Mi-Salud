@@ -78,21 +78,19 @@ Copia `.env.example` a `.env.local`:
 - Validación local completa: `supabase start` y después `pnpm test:db`. La prueba revierte
   sus fixtures y verifica grants, RLS entre dos usuarios, RPC y denegación anónima.
 
-## Estado / pendientes
+## Estado remoto
 
-- **Migración `20260623010000_supplement_cadences.sql` NO aplicada al remoto todavía** —
-  ajusta días de la semana (diario vs espaciado) y quita "Sea Moss". Aplicar cuando haya acceso a la BD.
-- **Migración `20260713000000_authenticated_rls.sql` NO aplicada al remoto todavía** —
-  normaliza RLS y políticas para todas las tablas. Aplicarla antes de desplegar este cambio.
-- **Migración `20260713010000_atomic_catalog_writes.sql` NO aplicada al remoto todavía** —
-  agrega las RPC transaccionales requeridas por las mutaciones de suplementos y stacks.
-- **Migraciones `20260713020000_nutrition_tracking.sql` y `20260713030000_biomarker_tracking.sql`
-  NO aplicadas al remoto todavía** — crean las tablas requeridas por Comer y Labs.
-- **Migración `20260713040000_authenticated_privileges.sql` NO aplicada al remoto todavía** —
-  concede privilegios SQL explícitos al rol autenticado y revoca acceso directo a `anon`.
-- **Migración `20260713050000_default_workout_plan.sql` NO aplicada al remoto todavía** —
-  instala desde la UI un plan base A/B de 45 min y 150 min semanales de Zona 2 sin reemplazar
-  planes activos. `supabase/seed/workout-seed.sql` queda como seed legado de catálogo amplio.
+- **Aplicadas al remoto el 2026-07-14:** `20260623010000_supplement_cadences.sql`,
+  `20260713000000_authenticated_rls.sql`, `20260713010000_atomic_catalog_writes.sql`,
+  `20260713020000_nutrition_tracking.sql`, `20260713030000_biomarker_tracking.sql`,
+  `20260713040000_authenticated_privileges.sql` y
+  `20260713050000_default_workout_plan.sql`.
+- Auditoría SQL posterior: las 19 tablas esperadas existen, todas tienen RLS activo,
+  `anon` no conserva privilegios directos, `authenticated` tiene los privilegios requeridos
+  y están disponibles `save_supplement`, `save_supplement_stack` e
+  `install_default_workout_plan` con sus permisos correctos.
+- `supabase/seed/workout-seed.sql` queda como seed legado de catálogo amplio; el plan base A/B
+  se instala desde la UI sin reemplazar planes activos.
 
 ## Contexto de salud
 
