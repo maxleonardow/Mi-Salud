@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession, useSessionSetLogs, useTemplateExercises } from "@/lib/mover/queries";
+import { useActivePlan, useSession, useSessionSetLogs, useTemplateExercises } from "@/lib/mover/queries";
 import { useLogSet, useCompleteSession, useDeleteSet } from "@/lib/mover/mutations";
 import { Button } from "@/components/ui/button";
 import { ExerciseVisual } from "@/components/mover/exercise-visual";
 import { SetInputRow } from "@/components/mover/set-input-row";
 import { RestTimer } from "@/components/mover/rest-timer";
-import { SubstitutePicker } from "@/components/mover/substitute-picker";
+import { SubstitutePicker, type SubstituteExercise } from "@/components/mover/substitute-picker";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getWorkoutPhase, prescribedSetsForWeek } from "@/lib/mover/program";
 import { toast } from "sonner";
+
+const PERSONALIZED_PLAN_NAME = "Plan atlético · 12 semanas";
 
 export default function SessionPage() {
   const params = useParams<{ id: string }>();
@@ -22,28 +25,37 @@ export default function SessionPage() {
   const templateId = (session as any)?.template_id ?? undefined;
   const { data: prescribed, isLoading: pLoading } = useTemplateExercises(templateId);
   const { data: setLogs } = useSessionSetLogs(sessionId);
+  const { data: activePlan } = useActivePlan();
 
   const logSet = useLogSet();
   const deleteSet = useDeleteSet();
   const completeSession = useCompleteSession();
 
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [substitutes, setSubstitutes] = useState<Record<string, { id: string; name: string }>>({});
+  const [substitutes, setSubstitutes] = useState<Record<string, SubstituteExercise>>({});
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [expressMode, setExpressMode] = useState(false);
 
   if (sLoading || pLoading) return <Skeleton className="h-96 w-full" />;
   if (!session) return <p>Sesión no encontrada.</p>;
   if (!prescribed || prescribed.length === 0) return <p>No hay ejercicios prescritos.</p>;
 
-  const current = prescribed[currentIdx];
+  const activePrescription = expressMode ? prescribed.slice(0, 3) : prescribed;
+  const current = activePrescription[currentIdx];
   const currentExerciseObj = current.exercise;
-  const exerciseToUse = substitutes[current.id]
-    ? { id: substitutes[current.id].id, name: substitutes[current.id].name }
-    : { id: currentExerciseObj?.id ?? "", name: currentExerciseObj?.name ?? "" };
+  const exerciseToUse = substitutes[current.id] ?? currentExerciseObj;
+  if (!exerciseToUse) return <p>El ejercicio ya no está disponible.</p>;
+
+  const personalized = activePlan?.name === PERSONALIZED_PLAN_NAME;
+  const currentWeek = personalized ? activePlan.current_week : 3;
+  const phase = getWorkoutPhase(currentWeek);
+  const prescribedSets = personalized
+    ? prescribedSetsForWeek(current.prescribed_sets, currentWeek)
+    : current.prescribed_sets;
 
   const setsForCurrent = (setLogs ?? []).filter(s => s.exercise_id === exerciseToUse.id);
   const setsDone = setsForCurrent.length;
-  const setsRemaining = current.prescribed_sets - setsDone;
+  const setsRemaining = prescribedSets - setsDone;
 
   async function handleSaveSet(vals: { weight: number | null; reps: number | null; rpe: number | null }) {
     const result = await logSet.mutateAsync({
@@ -64,7 +76,7 @@ export default function SessionPage() {
   }
 
   function nextExercise() {
-    if (currentIdx < prescribed!.length - 1) setCurrentIdx(i => i + 1);
+    if (currentIdx < activePrescription.length - 1) setCurrentIdx(i => i + 1);
   }
   function prevExercise() {
     if (currentIdx > 0) setCurrentIdx(i => i - 1);
@@ -72,11 +84,33 @@ export default function SessionPage() {
 
   return (
     <div className="space-y-5 max-w-2xl">
+      {personalized && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-[var(--accent-bg)] p-3">
+          <div>
+            <p className="text-xs font-semibold text-primary">Semana {currentWeek} · {phase.title}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {expressMode ? "Versión esencial: los tres ejercicios de mayor impacto." : "Versión completa de aproximadamente 45 minutos."}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setExpressMode(value => !value);
+              setCurrentIdx(0);
+            }}
+          >
+            {expressMode ? "Volver a 45 min" : "Usar versión 20 min"}
+          </Button>
+        </div>
+      )}
+
       {/* Progress header */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-            Ejercicio {currentIdx + 1} de {prescribed.length}
+            Ejercicio {currentIdx + 1} de {activePrescription.length}
           </p>
           <h1 className="text-xl font-bold tracking-tight">{exerciseToUse.name}</h1>
         </div>
@@ -94,16 +128,18 @@ export default function SessionPage() {
       <div className="rounded-xl border border-[var(--border-strong)] bg-white overflow-hidden">
         <ExerciseVisual
           name={exerciseToUse.name}
-          imageUrl={currentExerciseObj?.image_url}
+          imageUrl={exerciseToUse.image_url}
           className="aspect-video w-full"
         />
         <div className="p-4 text-sm">
           <p className="font-semibold text-base">
-            {current.prescribed_sets} sets × {current.reps_min === current.reps_max ? current.reps_min : `${current.reps_min}-${current.reps_max}`} reps
+            {prescribedSets} sets × {current.reps_min === current.reps_max ? current.reps_min : `${current.reps_min}-${current.reps_max}`} reps
           </p>
-          {current.target_rpe && <p className="text-muted-foreground">RPE objetivo: {current.target_rpe}</p>}
+          {(current.target_rpe || personalized) && (
+            <p className="text-muted-foreground">RPE objetivo: {personalized ? phase.targetRpe : current.target_rpe}</p>
+          )}
           {current.notes && <p className="text-muted-foreground mt-1">{current.notes}</p>}
-          {currentExerciseObj?.technique && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{currentExerciseObj.technique}</p>}
+          {exerciseToUse.technique && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{exerciseToUse.technique}</p>}
         </div>
       </div>
 
@@ -145,7 +181,7 @@ export default function SessionPage() {
         <Button variant="outline" onClick={prevExercise} disabled={currentIdx === 0} className="flex-1">
           ← Anterior
         </Button>
-        {currentIdx < prescribed.length - 1 ? (
+        {currentIdx < activePrescription.length - 1 ? (
           <Button onClick={nextExercise} className="flex-1">Siguiente →</Button>
         ) : (
           <Button onClick={handleFinish} className="flex-1" disabled={completeSession.isPending}>

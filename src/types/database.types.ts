@@ -771,6 +771,10 @@ export interface Database {
         Args: never;
         Returns: Database["public"]["Tables"]["workout_plans"]["Row"];
       };
+      install_personalized_workout_plan: {
+        Args: { p_replace_active?: boolean };
+        Returns: Database["public"]["Tables"]["workout_plans"]["Row"];
+      };
       save_supplement: {
         Args: {
           p_id: string | null;

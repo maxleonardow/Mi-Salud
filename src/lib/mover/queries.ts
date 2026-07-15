@@ -27,8 +27,14 @@ export type TemplateExercise = TemplateExerciseRow & {
     | "image_url"
     | "exercise_type"
     | "muscle_groups"
+    | "equipment"
   > | null;
 };
+
+export type ExerciseSummary = Pick<
+  ExerciseRow,
+  "id" | "name" | "technique" | "image_url" | "muscle_groups" | "equipment"
+>;
 
 export function useActivePlan() {
   return useQuery({
@@ -68,11 +74,28 @@ export function useTemplateExercises(templateId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("workout_template_exercises")
-        .select("*, exercise:exercises(id, name, technique, substitute_ids, image_url, exercise_type, muscle_groups)")
+        .select("*, exercise:exercises(id, name, technique, substitute_ids, image_url, exercise_type, muscle_groups, equipment)")
         .eq("template_id", templateId!)
         .order("position");
       if (error) throw error;
       return data as TemplateExercise[];
+    },
+  });
+}
+
+export function useExercisesByIds(exerciseIds: string[]) {
+  const stableIds = [...new Set(exerciseIds)].sort();
+
+  return useQuery({
+    queryKey: ["mover", "exercisesByIds", stableIds],
+    enabled: stableIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("exercises")
+        .select("id, name, technique, image_url, muscle_groups, equipment")
+        .in("id", stableIds);
+      if (error) throw error;
+      return data as ExerciseSummary[];
     },
   });
 }

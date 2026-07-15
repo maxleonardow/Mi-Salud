@@ -4,18 +4,19 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import type { ExerciseSummary } from "@/lib/mover/queries";
 
-type Exercise = { id: string; name: string; muscle_groups: string[] };
+export type SubstituteExercise = ExerciseSummary;
 
 type Props = {
   open: boolean;
   onClose: () => void;
   substituteIds: string[];
-  onPick: (exercise: Exercise) => void;
+  onPick: (exercise: SubstituteExercise) => void;
 };
 
 export function SubstitutePicker({ open, onClose, substituteIds, onPick }: Props) {
-  const [subs, setSubs] = useState<Exercise[]>([]);
+  const [subs, setSubs] = useState<SubstituteExercise[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -24,10 +25,10 @@ export function SubstitutePicker({ open, onClose, substituteIds, onPick }: Props
     const supabase = createClient();
     supabase
       .from("exercises")
-      .select("id, name, muscle_groups")
+      .select("id, name, technique, image_url, muscle_groups, equipment")
       .in("id", substituteIds)
       .then(({ data }) => {
-        setSubs((data as Exercise[]) ?? []);
+        setSubs((data as SubstituteExercise[]) ?? []);
         setLoading(false);
       });
   }, [open, substituteIds]);
@@ -52,7 +53,9 @@ export function SubstitutePicker({ open, onClose, substituteIds, onPick }: Props
                 onClick={() => { onPick(s); onClose(); }}
               >
                 <span className="font-semibold">{s.name}</span>
-                <span className="text-xs text-muted-foreground">{s.muscle_groups.join(", ")}</span>
+                <span className="text-xs text-muted-foreground">
+                  {s.equipment.length > 0 ? s.equipment.join(" · ") : s.muscle_groups.join(" · ")}
+                </span>
               </Button>
             ))}
           </div>

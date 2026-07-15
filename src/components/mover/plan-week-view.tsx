@@ -7,9 +7,11 @@ import {
   Flame,
   Gauge,
   HeartPulse,
+  Info,
   Repeat2,
+  Replace,
 } from "lucide-react";
-import { useActivePlan, usePlanSchedule, useTemplateExercises } from "@/lib/mover/queries";
+import { useActivePlan, useExercisesByIds, usePlanSchedule, useTemplateExercises } from "@/lib/mover/queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dayOfWeek } from "@/lib/mover/today";
 import { QueryError } from "@/components/ui/query-error";
@@ -17,7 +19,11 @@ import { DefaultPlanInstaller } from "@/components/mover/default-plan-installer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExerciseVisual } from "@/components/mover/exercise-visual";
+import { PersonalizedPlanUpgrade } from "@/components/mover/personalized-plan-upgrade";
+import { getWorkoutPhase } from "@/lib/mover/program";
 import { cn } from "@/lib/utils";
+
+const PERSONALIZED_PLAN_NAME = "Plan atlético · 12 semanas";
 
 const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 const DAY_NAMES_LONG = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -25,6 +31,7 @@ const DAY_NAMES_LONG = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "V
 const MUSCLE_NAMES: Record<string, string> = {
   back: "Espalda",
   biceps: "Bíceps",
+  calves: "Pantorrillas",
   chest: "Pecho",
   core: "Core",
   forearms: "Antebrazo",
@@ -58,6 +65,9 @@ type WorkoutDetailProps = {
 
 function WorkoutTemplateDetail({ templateId, name, days }: WorkoutDetailProps) {
   const { data: exercises, isLoading, error } = useTemplateExercises(templateId);
+  const substituteIds = [...new Set((exercises ?? []).flatMap(item => item.exercise?.substitute_ids ?? []))];
+  const { data: substitutes } = useExercisesByIds(substituteIds);
+  const substitutesById = new Map((substitutes ?? []).map(exercise => [exercise.id, exercise]));
 
   return (
     <Card className="gap-0 py-0">
@@ -82,6 +92,9 @@ function WorkoutTemplateDetail({ templateId, name, days }: WorkoutDetailProps) {
         {(exercises ?? []).map(item => {
           const exercise = item.exercise;
           if (!exercise) return null;
+          const alternatives = exercise.substitute_ids
+            .map(id => substitutesById.get(id))
+            .filter(alternative => alternative !== undefined);
 
           return (
             <article
@@ -152,6 +165,21 @@ function WorkoutTemplateDetail({ templateId, name, days }: WorkoutDetailProps) {
                     {exercise.technique}
                   </p>
                 )}
+                {alternatives.length > 0 && (
+                  <div className="rounded-lg border border-dashed border-primary/30 bg-[var(--accent-bg)] px-3 py-2.5">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                      <Replace className="size-3.5" /> Alternativas disponibles
+                    </p>
+                    <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+                      {alternatives.map(alternative => (
+                        <li key={alternative.id}>
+                          <span className="font-medium text-foreground">{alternative.name}</span>
+                          {alternative.equipment.length > 0 && ` · ${alternative.equipment.join(" / ")}`}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </article>
           );
@@ -169,6 +197,8 @@ export function PlanWeekView() {
   if (planLoading || slotsLoading) return <Skeleton className="h-96 w-full rounded-xl" />;
   if (planError || slotsError) return <QueryError message="No pudimos cargar tu plan semanal." />;
   if (!plan) return <DefaultPlanInstaller />;
+
+  const phase = getWorkoutPhase(plan.current_week);
 
   const ordered = [1, 2, 3, 4, 5, 6, 0].map(dow => {
     const slot = (slots ?? []).find(item => item.day_of_week === dow);
@@ -195,6 +225,8 @@ export function PlanWeekView() {
 
   return (
     <div className="space-y-6">
+      {plan.name !== PERSONALIZED_PLAN_NAME && <PersonalizedPlanUpgrade />}
+
       <Card className="gap-0 py-0">
         <CardHeader className="bg-[var(--accent-bg)] py-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -221,6 +253,22 @@ export function PlanWeekView() {
           </div>
         </CardContent>
       </Card>
+
+      {plan.name === PERSONALIZED_PLAN_NAME && (
+        <Card className="gap-0 border-primary/30 py-0">
+          <CardContent className="grid gap-4 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+            <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Info className="size-5" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Fase actual</p>
+              <p className="font-semibold">{phase.title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{phase.summary}</p>
+            </div>
+            <Badge variant="outline">RPE {phase.targetRpe}</Badge>
+          </CardContent>
+        </Card>
+      )}
 
       <section aria-labelledby="weekly-schedule-title">
         <h3 id="weekly-schedule-title" className="mb-3 text-sm font-semibold">Semana</h3>
@@ -253,7 +301,7 @@ export function PlanWeekView() {
       <section aria-labelledby="strength-routines-title" className="space-y-4">
         <div>
           <h3 id="strength-routines-title" className="text-lg font-semibold">Detalle de las rutinas</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Prescripción, descanso, técnica e imagen de cada ejercicio.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Prescripción, descanso, técnica, imagen y alternativas de cada ejercicio.</p>
         </div>
         {[...workouts.values()].map(workout => (
           <WorkoutTemplateDetail key={workout.templateId} {...workout} />

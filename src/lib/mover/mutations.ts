@@ -21,6 +21,22 @@ export function useInstallDefaultWorkoutPlan() {
   });
 }
 
+export function useInstallPersonalizedWorkoutPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (replaceActive: boolean) => {
+      const { data, error } = await supabase.rpc("install_personalized_workout_plan", {
+        p_replace_active: replaceActive,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mover"] });
+    },
+  });
+}
+
 export function useStartSession() {
   const qc = useQueryClient();
   return useMutation({

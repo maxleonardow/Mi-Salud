@@ -85,10 +85,14 @@ Copia `.env.example` a `.env.local`:
   `20260713020000_nutrition_tracking.sql`, `20260713030000_biomarker_tracking.sql`,
   `20260713040000_authenticated_privileges.sql` y
   `20260713050000_default_workout_plan.sql`.
+- **Aplicada al remoto el 2026-07-14:** `20260714000000_personalized_workout_plan.sql`,
+  que instala de forma reversible el plan atlético de 12 semanas, conserva el historial y
+  conecta alternativas para cada ejercicio. La función está disponible para `authenticated`.
 - Auditoría SQL posterior: las 19 tablas esperadas existen, todas tienen RLS activo,
   `anon` no conserva privilegios directos, `authenticated` tiene los privilegios requeridos
   y están disponibles `save_supplement`, `save_supplement_stack` e
-  `install_default_workout_plan` con sus permisos correctos.
+  `install_default_workout_plan` con sus permisos correctos. También se verificó
+  `install_personalized_workout_plan(boolean)` con permiso de ejecución para `authenticated`.
 - `supabase/seed/workout-seed.sql` queda como seed legado de catálogo amplio; el plan base A/B
   se instala desde la UI sin reemplazar planes activos.
 
