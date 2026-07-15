@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ExerciseImagePlaceholder } from "@/components/mover/exercise-image-placeholder";
+import { ExerciseMotionDemo } from "@/components/mover/exercise-motion-demo";
+import { getExerciseMotionType } from "@/lib/mover/exercise-motion";
 
 const EXERCISE_IMAGES: Record<string, string> = {
   "Goblet Squat": "/images/exercises/goblet-squat.webp",
@@ -36,6 +38,10 @@ export function ExerciseVisual({ name, imageUrl, className }: Props) {
         className={cn("h-full w-full object-cover", className)}
       />
     );
+  }
+
+  if (getExerciseMotionType(name)) {
+    return <ExerciseMotionDemo name={name} className={className} />;
   }
 
   const localImage = EXERCISE_IMAGES[name];
