@@ -20,7 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ExerciseVisual } from "@/components/mover/exercise-visual";
 import { PersonalizedPlanUpgrade } from "@/components/mover/personalized-plan-upgrade";
-import { getWorkoutPhase } from "@/lib/mover/program";
+import { getWorkoutPhase, prescribedSetsForWeek } from "@/lib/mover/program";
 import { cn } from "@/lib/utils";
 
 const PERSONALIZED_PLAN_NAME = "Plan atlético · 12 semanas";
@@ -61,13 +61,16 @@ type WorkoutDetailProps = {
   templateId: string;
   name: string;
   days: string[];
+  currentWeek: number;
+  personalized: boolean;
 };
 
-function WorkoutTemplateDetail({ templateId, name, days }: WorkoutDetailProps) {
+function WorkoutTemplateDetail({ templateId, name, days, currentWeek, personalized }: WorkoutDetailProps) {
   const { data: exercises, isLoading, error } = useTemplateExercises(templateId);
   const substituteIds = [...new Set((exercises ?? []).flatMap(item => item.exercise?.substitute_ids ?? []))];
   const { data: substitutes } = useExercisesByIds(substituteIds);
   const substitutesById = new Map((substitutes ?? []).map(exercise => [exercise.id, exercise]));
+  const phase = getWorkoutPhase(currentWeek);
 
   return (
     <Card className="gap-0 py-0">
@@ -95,6 +98,10 @@ function WorkoutTemplateDetail({ templateId, name, days }: WorkoutDetailProps) {
           const alternatives = exercise.substitute_ids
             .map(id => substitutesById.get(id))
             .filter(alternative => alternative !== undefined);
+          const displayedSets = personalized
+            ? prescribedSetsForWeek(item.prescribed_sets, currentWeek)
+            : item.prescribed_sets;
+          const displayedRpe = personalized ? phase.targetRpe : item.target_rpe;
 
           return (
             <article
@@ -125,14 +132,14 @@ function WorkoutTemplateDetail({ templateId, name, days }: WorkoutDetailProps) {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-muted-foreground">
                       <span className="flex items-center gap-1.5">
-                        <Dumbbell className="size-3.5" /> {item.prescribed_sets} series
+                        <Dumbbell className="size-3.5" /> {displayedSets} series
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Repeat2 className="size-3.5" /> {formatReps(item.reps_min, item.reps_max)} reps
                       </span>
-                      {item.target_rpe && (
+                      {displayedRpe && (
                         <span className="flex items-center gap-1.5">
-                          <Gauge className="size-3.5" /> RPE {item.target_rpe}
+                          <Gauge className="size-3.5" /> RPE {displayedRpe}
                         </span>
                       )}
                       <span className="flex items-center gap-1.5">
@@ -206,7 +213,12 @@ export function PlanWeekView() {
   });
 
   const workoutDays = ordered.filter(({ slot }) => slot?.template_id).length;
-  const activityDays = ordered.filter(({ slot }) => slot && !slot.template_id && slot.activity_label && !slot.activity_label.toLowerCase().includes("descanso")).length;
+  const activityDays = ordered.filter(({ slot }) => (
+    slot
+    && !slot.template_id
+    && slot.activity_label
+    && !slot.activity_label.toLowerCase().startsWith("descanso")
+  )).length;
   const workouts = new Map<string, WorkoutDetailProps>();
 
   ordered.forEach(({ dow, slot }) => {
@@ -220,6 +232,8 @@ export function PlanWeekView() {
       templateId: slot.template_id,
       name: slot.template.name,
       days: [DAY_NAMES_LONG[dow]],
+      currentWeek: plan.current_week,
+      personalized: plan.name === PERSONALIZED_PLAN_NAME,
     });
   });
 
