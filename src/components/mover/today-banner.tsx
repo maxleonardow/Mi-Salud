@@ -47,8 +47,7 @@ export function TodayBanner() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const templateName = ((slots ?? []).find(s => s.template_id === templateId) as any)?.template?.name ?? "Workout";
+  const templateName = (slots ?? []).find(s => s.template_id === templateId)?.template?.name ?? "Workout";
 
   async function handleStart() {
     const session = await startSession.mutateAsync({ templateId: templateId ?? null });
@@ -65,8 +64,7 @@ export function TodayBanner() {
         <ul className="mt-3 space-y-1 text-sm text-[var(--foreground)]/85">
           {(exercises ?? []).map(ex => (
             <li key={ex.id} className="flex justify-between">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <span>{ex.is_warmup ? "🔥 " : ""}{(ex as any).exercise?.name}</span>
+              <span>{ex.is_warmup ? "🔥 " : ""}{ex.exercise?.name}</span>
               <span className="text-muted-foreground">
                 {ex.prescribed_sets} × {ex.reps_min === ex.reps_max ? ex.reps_min : `${ex.reps_min}-${ex.reps_max}`}
                 {ex.target_rpe ? ` · RPE ${ex.target_rpe}` : ""}

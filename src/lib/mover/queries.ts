@@ -2,8 +2,33 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/types/database.types";
 
 const supabase = createClient();
+
+type PlanScheduleRow = Database["public"]["Tables"]["plan_schedule_slots"]["Row"];
+type TemplateExerciseRow = Database["public"]["Tables"]["workout_template_exercises"]["Row"];
+type ExerciseRow = Database["public"]["Tables"]["exercises"]["Row"];
+
+export type PlanScheduleSlot = PlanScheduleRow & {
+  template: Pick<
+    Database["public"]["Tables"]["workout_templates"]["Row"],
+    "id" | "name"
+  > | null;
+};
+
+export type TemplateExercise = TemplateExerciseRow & {
+  exercise: Pick<
+    ExerciseRow,
+    | "id"
+    | "name"
+    | "technique"
+    | "substitute_ids"
+    | "image_url"
+    | "exercise_type"
+    | "muscle_groups"
+  > | null;
+};
 
 export function useActivePlan() {
   return useQuery({
@@ -31,7 +56,7 @@ export function usePlanSchedule(planId: string | undefined) {
         .eq("plan_id", planId!)
         .order("day_of_week");
       if (error) throw error;
-      return data;
+      return data as PlanScheduleSlot[];
     },
   });
 }
@@ -47,7 +72,7 @@ export function useTemplateExercises(templateId: string | undefined) {
         .eq("template_id", templateId!)
         .order("position");
       if (error) throw error;
-      return data;
+      return data as TemplateExercise[];
     },
   });
 }

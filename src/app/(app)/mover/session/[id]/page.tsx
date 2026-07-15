@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession, useSessionSetLogs, useTemplateExercises } from "@/lib/mover/queries";
 import { useLogSet, useCompleteSession, useDeleteSet } from "@/lib/mover/mutations";
 import { Button } from "@/components/ui/button";
-import { ExerciseImagePlaceholder } from "@/components/mover/exercise-image-placeholder";
+import { ExerciseVisual } from "@/components/mover/exercise-visual";
 import { SetInputRow } from "@/components/mover/set-input-row";
 import { RestTimer } from "@/components/mover/rest-timer";
 import { SubstitutePicker } from "@/components/mover/substitute-picker";
@@ -36,8 +36,7 @@ export default function SessionPage() {
   if (!prescribed || prescribed.length === 0) return <p>No hay ejercicios prescritos.</p>;
 
   const current = prescribed[currentIdx];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const currentExerciseObj = (current as any).exercise as { id: string; name: string; substitute_ids: string[]; technique: string | null; image_url: string | null } | undefined;
+  const currentExerciseObj = current.exercise;
   const exerciseToUse = substitutes[current.id]
     ? { id: substitutes[current.id].id, name: substitutes[current.id].name }
     : { id: currentExerciseObj?.id ?? "", name: currentExerciseObj?.name ?? "" };
@@ -93,17 +92,11 @@ export default function SessionPage() {
 
       {/* Exercise card */}
       <div className="rounded-xl border border-[var(--border-strong)] bg-white overflow-hidden">
-        {currentExerciseObj?.image_url ? (
-          <img
-            src={currentExerciseObj.image_url}
-            alt={`Cómo hacer ${exerciseToUse.name}`}
-            className="w-full aspect-video object-cover"
-          />
-        ) : (
-          <div className="p-4">
-            <ExerciseImagePlaceholder name={exerciseToUse.name} size={80} />
-          </div>
-        )}
+        <ExerciseVisual
+          name={exerciseToUse.name}
+          imageUrl={currentExerciseObj?.image_url}
+          className="aspect-video w-full"
+        />
         <div className="p-4 text-sm">
           <p className="font-semibold text-base">
             {current.prescribed_sets} sets × {current.reps_min === current.reps_max ? current.reps_min : `${current.reps_min}-${current.reps_max}`} reps
