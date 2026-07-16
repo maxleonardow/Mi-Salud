@@ -59,7 +59,7 @@ function ExerciseDetail({ exercise }: { exercise: PlanExerciseLibraryItem }) {
   const hasVideo = getExerciseMedia(exercise.name)?.kind === "video";
 
   return (
-    <DialogContent className="max-h-[92svh] overflow-y-auto p-0 sm:max-w-2xl">
+    <DialogContent className="block max-h-[92svh] overflow-y-auto p-0 sm:max-w-2xl">
       <ExerciseVisual
         name={exercise.name}
         imageUrl={exercise.image_url}
