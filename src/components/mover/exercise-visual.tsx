@@ -1,14 +1,13 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ExerciseImagePlaceholder } from "@/components/mover/exercise-image-placeholder";
-import { ExercisePhotoSequence } from "@/components/mover/exercise-photo-sequence";
-import { getExercisePhotoSequence } from "@/lib/mover/exercise-media";
+import { ExerciseVideo } from "@/components/mover/exercise-video";
+import { getExerciseMedia } from "@/lib/mover/exercise-media";
 
 const EXERCISE_IMAGES: Record<string, string> = {
   "Goblet Squat": "/images/exercises/goblet-squat.webp",
   "Sentadilla con Barra": "/images/exercises/barbell-back-squat.webp",
   "Press Banca con Mancuernas": "/images/exercises/dumbbell-bench-press.webp",
-  "Remo con Mancuerna 1 Brazo": "/images/exercises/one-arm-dumbbell-row.webp",
   "Press Militar Mancuernas Sentado": "/images/exercises/seated-dumbbell-overhead-press.webp",
   "Face Pull": "/images/exercises/face-pull.webp",
   "Curl Mancuernas Alternados": "/images/exercises/alternating-dumbbell-curl.webp",
@@ -24,10 +23,11 @@ const EXERCISE_IMAGES: Record<string, string> = {
 type Props = {
   name: string;
   imageUrl?: string | null;
+  animate?: boolean;
   className?: string;
 };
 
-export function ExerciseVisual({ name, imageUrl, className }: Props) {
+export function ExerciseVisual({ name, imageUrl, animate = true, className }: Props) {
   if (imageUrl) {
     return (
       // Exercise URLs can be user-managed and are not limited to a fixed remote host.
@@ -40,14 +40,41 @@ export function ExerciseVisual({ name, imageUrl, className }: Props) {
     );
   }
 
-  const photoSequence = getExercisePhotoSequence(name);
-  if (photoSequence) {
+  const media = getExerciseMedia(name);
+  if (media?.kind === "video") {
     return (
-      <ExercisePhotoSequence
+      <ExerciseVideo
         name={name}
-        sequence={photoSequence}
+        media={media}
+        animate={animate}
         className={className}
       />
+    );
+  }
+
+  if (media?.kind === "photo") {
+    return (
+      <figure className={cn("relative overflow-hidden bg-black", className)}>
+        <Image
+          src={media.src}
+          alt={`Fotografía real de ${name}`}
+          fill
+          sizes="(max-width: 640px) 100vw, 176px"
+          style={{ objectPosition: media.objectPosition }}
+          className="object-cover"
+        />
+        <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-black/85 to-transparent p-3 pt-12 text-[10px] text-white">
+          <span className="font-semibold uppercase tracking-[0.08em]">Foto real</span>
+          <a
+            href={media.attribution.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="truncate underline decoration-white/40 underline-offset-2"
+          >
+            {media.attribution.label}
+          </a>
+        </figcaption>
+      </figure>
     );
   }
 

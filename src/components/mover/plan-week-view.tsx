@@ -111,6 +111,7 @@ function WorkoutTemplateDetail({ templateId, name, days, currentWeek, personaliz
               <ExerciseVisual
                 name={exercise.name}
                 imageUrl={exercise.image_url}
+                animate={false}
                 className="aspect-[16/9] min-h-36 sm:aspect-auto sm:min-h-48"
               />
               <div className="space-y-3 p-4">

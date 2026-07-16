@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getExercisePhotoSequence } from "@/lib/mover/exercise-media";
+import { EXERCISE_MEDIA, getExerciseMedia } from "@/lib/mover/exercise-media";
 
 const activePlanExercises = [
   "Prensa de Piernas",
@@ -18,16 +20,37 @@ const activePlanExercises = [
   "Dead Bug",
 ] as const;
 
-describe("exercise photo sequences", () => {
-  it.each(activePlanExercises)("covers %s with two optimized frames", (exercise) => {
-    const sequence = getExercisePhotoSequence(exercise);
+describe("exercise media", () => {
+  it.each(activePlanExercises)("covers %s with sourced real media", (exercise) => {
+    const media = getExerciseMedia(exercise);
 
-    expect(sequence).not.toBeNull();
-    expect(sequence?.start).toMatch(/-a\.webp$/);
-    expect(sequence?.end).toMatch(/-b\.webp$/);
+    expect(media).not.toBeNull();
+    expect(media?.attribution.sourceUrl).toMatch(/^https:\/\//);
+    expect(media?.src).not.toContain("/sequences/");
+  });
+
+  it("uses film for the Bulgarian split squat shown in sessions", () => {
+    expect(getExerciseMedia("Sentadilla Búlgara con Mancuernas")).toMatchObject({
+      kind: "video",
+      src: "/videos/exercises/bulgarian-split-squat.m4v",
+    });
+  });
+
+  it("does not label the two static references as video", () => {
+    expect(getExerciseMedia("Remo con Mancuerna 1 Brazo")?.kind).toBe("photo");
+    expect(getExerciseMedia("Dead Bug")?.kind).toBe("photo");
+  });
+
+  it("ships every referenced video, poster, and photo with the app", () => {
+    for (const media of Object.values(EXERCISE_MEDIA)) {
+      expect(existsSync(join(process.cwd(), "public", media.src)), media.src).toBe(true);
+      if (media.kind === "video") {
+        expect(existsSync(join(process.cwd(), "public", media.poster)), media.poster).toBe(true);
+      }
+    }
   });
 
   it("keeps the placeholder fallback for an unknown exercise", () => {
-    expect(getExercisePhotoSequence("Movimiento personalizado")).toBeNull();
+    expect(getExerciseMedia("Movimiento personalizado")).toBeNull();
   });
 });
