@@ -60,66 +60,68 @@ function ExerciseDetail({ exercise }: { exercise: PlanExerciseLibraryItem }) {
 
   return (
     <DialogContent className="block max-h-[92svh] overflow-y-auto p-0 sm:max-w-2xl">
-      <ExerciseVisual
-        name={exercise.name}
-        imageUrl={exercise.image_url}
-        className="aspect-video w-full rounded-t-xl"
-      />
-      <div className="space-y-4 px-4 pb-5">
-        <DialogHeader>
-          <div className="flex flex-wrap items-center gap-2 pr-10">
-            <Badge>{hasVideo ? "Video" : "Fotografía"}</Badge>
-            {exercise.template_names.map(templateName => (
-              <Badge key={templateName} variant="outline">{templateName}</Badge>
-            ))}
-          </div>
-          <DialogTitle className="text-xl">{exercise.name}</DialogTitle>
-          <DialogDescription>
-            Demostración, puntos de técnica y alternativas disponibles dentro de tu plan.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-wrap gap-1.5">
-          {exercise.muscle_groups.map(muscle => (
-            <span key={muscle} className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              {MUSCLE_NAMES[muscle] ?? muscle}
-            </span>
-          ))}
-        </div>
-
-        {exercise.technique && (
-          <section className="rounded-xl bg-[var(--accent-bg)] p-4">
-            <h3 className="text-sm font-semibold">Cómo hacerlo</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{exercise.technique}</p>
-          </section>
-        )}
-
-        {exercise.equipment.length > 0 && (
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Equipo</p>
-            <p className="mt-1 text-sm">{exercise.equipment.map(item => EQUIPMENT_NAMES[item] ?? item).join(" · ")}</p>
-          </div>
-        )}
-
-        {exercise.alternatives.length > 0 && (
-          <section className="rounded-xl border border-dashed border-primary/30 p-4">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
-              <Replace className="size-4" /> Alternativas
-            </h3>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {exercise.alternatives.map(alternative => (
-                <div key={alternative.id} className="rounded-lg bg-muted/60 px-3 py-2.5">
-                  <p className="text-sm font-medium">{alternative.name}</p>
-                  {alternative.equipment.length > 0 && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {alternative.equipment.map(item => EQUIPMENT_NAMES[item] ?? item).join(" · ")}
-                    </p>
-                  )}
-                </div>
+      <div>
+        <ExerciseVisual
+          name={exercise.name}
+          imageUrl={exercise.image_url}
+          className="aspect-video w-full rounded-t-xl"
+        />
+        <div className="space-y-4 px-4 pb-5 pt-4">
+          <DialogHeader>
+            <div className="flex flex-wrap items-center gap-2 pr-10">
+              <Badge>{hasVideo ? "Video" : "Fotografía"}</Badge>
+              {exercise.template_names.map(templateName => (
+                <Badge key={templateName} variant="outline">{templateName}</Badge>
               ))}
             </div>
-          </section>
-        )}
+            <DialogTitle className="text-xl">{exercise.name}</DialogTitle>
+            <DialogDescription>
+              Demostración, puntos de técnica y alternativas disponibles dentro de tu plan.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-wrap gap-1.5">
+            {exercise.muscle_groups.map(muscle => (
+              <span key={muscle} className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                {MUSCLE_NAMES[muscle] ?? muscle}
+              </span>
+            ))}
+          </div>
+
+          {exercise.technique && (
+            <section className="rounded-xl bg-[var(--accent-bg)] p-4">
+              <h3 className="text-sm font-semibold">Cómo hacerlo</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{exercise.technique}</p>
+            </section>
+          )}
+
+          {exercise.equipment.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Equipo</p>
+              <p className="mt-1 text-sm">{exercise.equipment.map(item => EQUIPMENT_NAMES[item] ?? item).join(" · ")}</p>
+            </div>
+          )}
+
+          {exercise.alternatives.length > 0 && (
+            <section className="rounded-xl border border-dashed border-primary/30 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Replace className="size-4" /> Alternativas
+              </h3>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {exercise.alternatives.map(alternative => (
+                  <div key={alternative.id} className="rounded-lg bg-muted/60 px-3 py-2.5">
+                    <p className="text-sm font-medium">{alternative.name}</p>
+                    {alternative.equipment.length > 0 && (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {alternative.equipment.map(item => EQUIPMENT_NAMES[item] ?? item).join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       </div>
     </DialogContent>
   );
