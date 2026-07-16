@@ -194,47 +194,49 @@
   }
 }
 
-@keyframes exercise-motion-pose-a {
-  0%, 35% { opacity: 1; }
-  50%, 85% { opacity: 0; }
+@keyframes exercise-photo-start {
+  0%, 42% { opacity: 1; }
+  50%, 92% { opacity: 0; }
   100% { opacity: 1; }
 }
 
-@keyframes exercise-motion-pose-b {
-  0%, 35% { opacity: 0; }
-  50%, 85% { opacity: 1; }
+@keyframes exercise-photo-end {
+  0%, 42% { opacity: 0; }
+  50%, 92% { opacity: 1; }
   100% { opacity: 0; }
 }
 
-@keyframes exercise-motion-live {
-  0%, 100% { opacity: 0.45; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1); }
+@keyframes exercise-photo-progress {
+  0%, 50%, 100% { transform: scaleX(0); }
+  42%, 92% { transform: scaleX(1); }
 }
 
-.exercise-motion-pose-a {
-  animation: exercise-motion-pose-a 3.2s ease-in-out infinite;
+.exercise-photo-frame-start {
+  animation: exercise-photo-start 5.6s ease-in-out infinite;
 }
 
-.exercise-motion-pose-b {
-  animation: exercise-motion-pose-b 3.2s ease-in-out infinite;
+.exercise-photo-frame-end {
+  animation: exercise-photo-end 5.6s ease-in-out infinite;
 }
 
-.exercise-motion-live-dot {
-  animation: exercise-motion-live 1.6s ease-in-out infinite;
+.exercise-photo-progress {
+  width: 100%;
+  transform-origin: left;
+  animation: exercise-photo-progress 5.6s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exercise-motion-pose,
-  .exercise-motion-live-dot {
+  .exercise-photo-frame,
+  .exercise-photo-progress {
     animation: none;
   }
 
-  .exercise-motion-pose-a {
+  .exercise-photo-frame-start {
     opacity: 1;
   }
 
-  .exercise-motion-pose-b,
-  .exercise-motion-direction circle {
+  .exercise-photo-frame-end,
+  .exercise-photo-progress {
     display: none;
   }
 }

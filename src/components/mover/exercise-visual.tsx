@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ExerciseImagePlaceholder } from "@/components/mover/exercise-image-placeholder";
-import { ExerciseMotionDemo } from "@/components/mover/exercise-motion-demo";
-import { getExerciseMotionType } from "@/lib/mover/exercise-motion";
+import { ExercisePhotoSequence } from "@/components/mover/exercise-photo-sequence";
+import { getExercisePhotoSequence } from "@/lib/mover/exercise-media";
 
 const EXERCISE_IMAGES: Record<string, string> = {
   "Goblet Squat": "/images/exercises/goblet-squat.webp",
@@ -40,8 +40,15 @@ export function ExerciseVisual({ name, imageUrl, className }: Props) {
     );
   }
 
-  if (getExerciseMotionType(name)) {
-    return <ExerciseMotionDemo name={name} className={className} />;
+  const photoSequence = getExercisePhotoSequence(name);
+  if (photoSequence) {
+    return (
+      <ExercisePhotoSequence
+        name={name}
+        sequence={photoSequence}
+        className={className}
+      />
+    );
   }
 
   const localImage = EXERCISE_IMAGES[name];
